@@ -7,19 +7,20 @@ from .exceptions import (
     InsufficientCreditsError,
     AnalysisError
 )
-from dotenv import load_dotenv
-import os
+from convolens.config.settings import get_settings
 
-load_dotenv()
+settings = get_settings()
 
+
+settings.API_ENDPOINT
 class ConvoLensClient:
-    def __init__(self, api_key: str, base_url: str = "http://localhost:8002"):
+    def __init__(self, api_key: str, base_url: str = settings.API_ENDPOINT):
         """
         Initialize the ConvoLens client.
 
         Args:
             api_key (str): The user's API key.
-            base_url (str, optional): The base URL of the ConvoLens API. Defaults to "http://localhost:8002".
+            base_url (str, optional): The base URL of the ConvoLens API. Defaults to settings.API_ENDPOINT.
         """
         self.api_key = api_key
         self.base_url = base_url.rstrip('/')
