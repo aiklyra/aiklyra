@@ -14,16 +14,15 @@ settings = get_settings()
 
 settings.API_ENDPOINT
 class ConvoLensClient:
-    def __init__(self, api_key: str, base_url: str = settings.API_ENDPOINT):
+    def __init__(self, api_key: str):
         """
         Initialize the ConvoLens client.
 
         Args:
             api_key (str): The user's API key.
-            base_url (str, optional): The base URL of the ConvoLens API. Defaults to settings.API_ENDPOINT.
         """
         self.api_key = api_key
-        self.base_url = base_url.rstrip('/')
+        self.base_url = settings.API_ENDPOINT.rstrip('/')
         self.headers = {
             "X-API-Key": self.api_key,
             "Content-Type": "application/json"
