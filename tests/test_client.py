@@ -6,19 +6,19 @@ sys.path.append(os.path.join(""))
 
 import unittest
 from unittest.mock import patch
-from Aethra.client import ConvoLensClient
-from Aethra.exceptions import (
+from aethra.client import AethraClient
+from aethra.exceptions import (
     InvalidAPIKeyError,
     InsufficientCreditsError,
     AnalysisError,
-    ConvoLensAPIError
+    AethraAPIError
 )
-from Aethra.models import ConversationFlowAnalysisResponse
+from aethra.models import ConversationFlowAnalysisResponse
 
 class TestConvoLensClient(unittest.TestCase):
     def setUp(self):
         self.api_key = "test_api_key"
-        self.client = ConvoLensClient(api_key=self.api_key, base_url="http://localhost:8002")
+        self.client = AethraClient(api_key=self.api_key, base_url="http://localhost:8002")
         self.conversation_data = {
             "conversation_1": [
                 {"role": "user", "content": "Hi, I need help with my account."},
@@ -79,7 +79,7 @@ class TestConvoLensClient(unittest.TestCase):
         mock_response.text = "Internal Server Error"
         mock_post.return_value = mock_response
 
-        with self.assertRaises(ConvoLensAPIError):
+        with self.assertRaises(AethraClient):
             self.client.analyse(conversation_data=self.conversation_data)
 
 if __name__ == '__main__':
