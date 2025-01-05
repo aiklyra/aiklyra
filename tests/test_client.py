@@ -6,14 +6,14 @@ sys.path.append(os.path.join(""))
 
 import unittest
 from unittest.mock import patch
-from convolens.client import ConvoLensClient
-from convolens.exceptions import (
+from Aethra.client import ConvoLensClient
+from Aethra.exceptions import (
     InvalidAPIKeyError,
     InsufficientCreditsError,
     AnalysisError,
     ConvoLensAPIError
 )
-from convolens.models import ConversationFlowAnalysisResponse
+from Aethra.models import ConversationFlowAnalysisResponse
 
 class TestConvoLensClient(unittest.TestCase):
     def setUp(self):
