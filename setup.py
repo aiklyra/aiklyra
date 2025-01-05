@@ -3,9 +3,9 @@ from setuptools import setup, find_packages
 setup(
     name='aethra',
     version='0.1.0',
-    author='Aethra Data',
+    author='Aethra',
     author_email='achref.benammar@ieee.org',
-    description='A Python client library for ConvoLens API',
+    description='A Python client library for Aethra API',
     long_description=open('README.md', encoding='utf-8').read(),
     long_description_content_type='text/markdown',
     url="https://github.com/AethraData/aethra.git",
@@ -21,5 +21,5 @@ setup(
         'Programming Language :: Python :: 3',
         'Operating System :: OS Independent',
     ],
-    python_requires='>=3.12',
+    python_requires='>=3.11',
 )
