@@ -1,4 +1,4 @@
-# ConvoLens
+# Aethra python package 
 
 **ConvoLens** is a Python client library that provides a simple interface to your FastAPI-powered conversation analysis API. It allows developers to easily submit conversation data for clustering and analysis **without** needing to configure the API’s base URL.
 
