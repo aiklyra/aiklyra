@@ -8,7 +8,7 @@ setup(
     description='A Python client library for ConvoLens API',
     long_description=open('README.md', encoding='utf-8').read(),
     long_description_content_type='text/markdown',
-    url="https://github.com/AethraData/aethra.git"
+    url="https://github.com/AethraData/aethra.git",
     packages=find_packages(),
     install_requires=[
         'requests>=2.25.1',
