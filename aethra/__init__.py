@@ -1,4 +1,4 @@
-from .client import ConvoLensClient
+from .client import AethraClient
 from .exceptions import (
     AethraAPIError,
     InvalidAPIKeyError,

@@ -24,21 +24,21 @@ class AethraAPIError(Exception):
         return base
 
 
-class InvalidAPIKeyError(ConvoLensAPIError):
+class InvalidAPIKeyError(AethraAPIError):
     """Raised when the API key is invalid."""
 
     def __init__(self, message="Invalid API Key.", status_code=403, details=None):
         super().__init__(message, status_code, details)
 
 
-class InsufficientCreditsError(ConvoLensAPIError):
+class InsufficientCreditsError(AethraAPIError):
     """Raised when the user has insufficient credits."""
 
     def __init__(self, message="Insufficient credits.", status_code=403, details=None):
         super().__init__(message, status_code, details)
 
 
-class AnalysisError(ConvoLensAPIError):
+class AnalysisError(AethraAPIError):
     """Raised when analysis fails."""
 
     def __init__(self, message="Analysis failed.", status_code=500, details=None):
