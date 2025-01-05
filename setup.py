@@ -1,14 +1,14 @@
 from setuptools import setup, find_packages
 
 setup(
-    name='ConvoLens',
+    name='aethra',
     version='0.1.0',
     author='Aethra Data',
     author_email='achref.benammar@ieee.org',
     description='A Python client library for ConvoLens API',
     long_description=open('README.md', encoding='utf-8').read(),
     long_description_content_type='text/markdown',
-    url='https://github.com/AethraData/ConvoLens.git',  # Update with your repository URL
+    url="https://github.com/AethraData/aethra.git"
     packages=find_packages(),
     install_requires=[
         'requests>=2.25.1',
