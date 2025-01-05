@@ -7,22 +7,19 @@ from .exceptions import (
     InsufficientCreditsError,
     AnalysisError
 )
-from convolens.config.settings import get_settings
-
-settings = get_settings()
 
 
-settings.API_ENDPOINT
-class ConvoLensClient:
-    def __init__(self, api_key: str):
+class AethraClient:
+    def __init__(self, api_key: str, base_url: str = "http://localhost:8002"):
         """
         Initialize the ConvoLens client.
 
         Args:
             api_key (str): The user's API key.
+            base_url (str, optional): The base URL of the ConvoLens API. Defaults to "http://localhost:8002".
         """
         self.api_key = api_key
-        self.base_url = settings.API_ENDPOINT.rstrip('/')
+        self.base_url = base_url.rstrip('/')
         self.headers = {
             "X-API-Key": self.api_key,
             "Content-Type": "application/json"
