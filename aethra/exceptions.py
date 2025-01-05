@@ -1,4 +1,4 @@
-class ConvoLensAPIError(Exception):
+class AethraAPIError(Exception):
     """Base exception for ConvoLens API errors."""
 
     def __init__(self, message: str, status_code: int = None, details: dict = None):

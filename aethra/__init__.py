@@ -1,6 +1,6 @@
 from .client import ConvoLensClient
 from .exceptions import (
-    ConvoLensAPIError,
+    AethraAPIError,
     InvalidAPIKeyError,
     InsufficientCreditsError,
     AnalysisError

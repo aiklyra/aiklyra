@@ -2,7 +2,7 @@ import requests
 from typing import Dict, List, Union
 from .models import ConversationFlowAnalysisRequest, ConversationFlowAnalysisResponse
 from .exceptions import (
-    ConvoLensAPIError,
+    AethraAPIError,
     InvalidAPIKeyError,
     InsufficientCreditsError,
     AnalysisError
@@ -67,7 +67,7 @@ class AethraClient:
         try:
             response = requests.post(url, headers=self.headers, json=payload)
         except requests.RequestException as e:
-            raise ConvoLensAPIError(f"Request failed: {e}")
+            raise AethraAPIError(f"Request failed: {e}")
 
         if response.status_code == 200:
             try:
@@ -81,6 +81,6 @@ class AethraClient:
             elif "Insufficient credits" in detail:
                 raise InsufficientCreditsError("Insufficient credits.")
             else:
-                raise ConvoLensAPIError(f"Forbidden: {detail}")
+                raise AethraAPIError(f"Forbidden: {detail}")
         else:
-            raise ConvoLensAPIError(f"Error {response.status_code}: {response.text}")
+            raise AethraAPIError(f"Error {response.status_code}: {response.text}")
