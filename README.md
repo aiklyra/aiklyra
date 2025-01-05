@@ -1,7 +1,3 @@
-Here’s the updated README file with the corrected code to include the `base_url` parameter when initializing the `AethraClient`:
-
----
-
 # Aethra Python Package 
 
 **Aethra** is a Python client library that provides a simple interface to your FastAPI-powered conversation analysis API. It allows developers to easily submit conversation data for clustering and analysis.
@@ -211,7 +207,3 @@ If you have questions, suggestions, or issues, feel free to open an issue on the
 ---
 
 _Thank you for using Aethra! We look forward to seeing how you integrate it into your projects._
-
----
-
-This updated README ensures that the `base_url` parameter is explicitly provided when initializing the `AethraClient`. Let me know if further refinements are needed!
