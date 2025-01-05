@@ -1,6 +1,6 @@
 # Aethra python package 
 
-**ConvoLens** is a Python client library that provides a simple interface to your FastAPI-powered conversation analysis API. It allows developers to easily submit conversation data for clustering and analysis **without** needing to configure the API’s base URL.
+**Aethra** is a Python client library that provides a simple interface to your FastAPI-powered conversation analysis API. It allows developers to easily submit conversation data for clustering and analysis **without** needing to configure the API’s base URL.
 
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
 
@@ -34,8 +34,8 @@
 
 1. **Clone or Download the Repository** (if you haven’t already):
    ```bash
-   git clone https://github.com/yourusername/ConvoLens.git
-   cd ConvoLens
+   git clone https://github.com/AethraData/aethra.git
+   cd Aethra
    ```
 
 2. **Install via `setup.py`**:
@@ -66,13 +66,13 @@
 
 2. **Import the Client**
    ```python
-   from convolens.client import ConvoLensClient
+   from Aethra.client import AethraClient
    ```
 
 3. **Initialize the Client**
    ```python
    # The base URL is configured inside the library and cannot be changed by users
-   client = ConvoLensClient(api_key="your_api_key_here")
+   client = AethraClient(api_key="your_api_key_here")
    ```
 
 ---
@@ -82,12 +82,12 @@
 Below is a simple script that demonstrates sending a conversation for analysis:
 
 ```python
-from convolens.client import ConvoLensClient
-from convolens.exceptions import (
+from aethra import AethraClient
+from aethra.exceptions import (
     InvalidAPIKeyError,
     InsufficientCreditsError,
     AnalysisError,
-    ConvoLensAPIError
+    AethraAPIError
 )
 
 def main():
@@ -95,7 +95,7 @@ def main():
     api_key = "your_api_key_here"
 
     # Initialize the client (base URL is internal, no need to specify)
-    client = ConvoLensClient(api_key=api_key)
+    client = AethraClient(api_key=api_key)
 
     # Example conversation data
     conversation_data = {
@@ -134,7 +134,7 @@ def main():
         print("Insufficient credits for analysis.")
     except AnalysisError as e:
         print(f"Analysis failed: {e}")
-    except ConvoLensAPIError as e:
+    except AethraAPIError as e:
         print(f"API Error: {e}")
 
 if __name__ == "__main__":
@@ -206,4 +206,4 @@ If you have questions, suggestions, or issues, feel free to open an issue on the
 
 ---
 
-_Thank you for using ConvoLens! We look forward to seeing how you integrate it into your projects._
+_Thank you for using Aethra! We look forward to seeing how you integrate it into your projects._
