@@ -1,86 +1,91 @@
-import sys
-import os
-
-# Add the project root directory to sys.path
-sys.path.append(os.path.join(""))
-
+import sys 
+import os 
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 import unittest
-from unittest.mock import patch
-from aethra.client import AethraClient
-from aethra.exceptions import (
+from unittest.mock import patch, MagicMock
+from aethra.client import (
+    AethraClient,
     InvalidAPIKeyError,
     InsufficientCreditsError,
     AnalysisError,
-    AethraAPIError
+    ConversationFlowAnalysisRequest,
+    ConversationFlowAnalysisResponse
 )
-from aethra.models import ConversationFlowAnalysisResponse
 
-class TestConvoLensClient(unittest.TestCase):
+class TestAethraClient(unittest.TestCase):
+
     def setUp(self):
+        """Set up test variables and objects."""
         self.api_key = "test_api_key"
-        self.client = AethraClient(api_key=self.api_key, base_url="http://localhost:8002")
+        self.base_url = "http://localhost:8002"
+        self.client = AethraClient(api_key=self.api_key, base_url=self.base_url)
         self.conversation_data = {
-            "conversation_1": [
-                {"role": "user", "content": "Hi, I need help with my account."},
-                {"role": "agent", "content": "Sure, could you please provide me with your account ID?"},
-                {"role": "user", "content": "It's 12345."}
-            ],
-            "conversation_2": [
-                {"role": "user", "content": "Can I change my subscription plan?"},
-                {"role": "agent", "content": "Yes, you can change it from the settings page. Would you like me to guide you through the process?"},
-                {"role": "user", "content": "That would be helpful. Thank you."}
-            ],
-            "conversation_3": [
-                {"role": "user", "content": "How can I reset my password?"},
-                {"role": "agent", "content": "To reset your password, click on 'Forgot Password' on the login page and follow the instructions."},
-                {"role": "user", "content": "Got it, thanks."}
-            ]
+            "session_1": [{"role": "user", "content": "Hello"}, {"role": "assistant", "content": "Hi there!"}]
         }
 
-    @patch('convolens.client.requests.post')
+    @patch("aethra.client.requests.post")
     def test_analyse_success(self, mock_post):
-        mock_response = unittest.mock.Mock()
+        """Test successful analysis."""
+        mock_response = MagicMock()
         mock_response.status_code = 200
         mock_response.json.return_value = {
-            "transition_matrix": [[0.1, 0.9], [0.2, 0.8]],
-            "intent_by_cluster": {0: "Account Assistance", 1: "Subscription Management"}
+            "transition_matrix": [[0.1, 0.9], [0.8, 0.2]],
+            "intent_by_cluster": {0: "greeting", 1: "response"}
         }
         mock_post.return_value = mock_response
 
-        response = self.client.analyse(conversation_data=self.conversation_data)
-        self.assertIsInstance(response, ConversationFlowAnalysisResponse)
-        self.assertEqual(response.transition_matrix, [[0.1, 0.9], [0.2, 0.8]])
-        self.assertEqual(response.intent_by_cluster, {0: "Account Assistance", 1: "Subscription Management"})
+        result = self.client.analyse(self.conversation_data)
+        
+        self.assertIsInstance(result, ConversationFlowAnalysisResponse)
+        self.assertEqual(result.transition_matrix, [[0.1, 0.9], [0.8, 0.2]])
+        self.assertEqual(result.intent_by_cluster[0], "greeting")
 
-    @patch('convolens.client.requests.post')
+    @patch("aethra.client.requests.post")
+
     def test_analyse_invalid_api_key(self, mock_post):
-        mock_response = unittest.mock.Mock()
+        """Test invalid API key error."""
+        mock_response = MagicMock()
         mock_response.status_code = 403
         mock_response.json.return_value = {"detail": "Invalid API Key"}
         mock_post.return_value = mock_response
 
         with self.assertRaises(InvalidAPIKeyError):
-            self.client.analyse(conversation_data=self.conversation_data)
+            self.client.analyse(self.conversation_data)
 
-    @patch('convolens.client.requests.post')
+    @patch("aethra.client.requests.post")
     def test_analyse_insufficient_credits(self, mock_post):
-        mock_response = unittest.mock.Mock()
+        """Test insufficient credits error."""
+        mock_response = MagicMock()
         mock_response.status_code = 403
         mock_response.json.return_value = {"detail": "Insufficient credits"}
         mock_post.return_value = mock_response
 
         with self.assertRaises(InsufficientCreditsError):
-            self.client.analyse(conversation_data=self.conversation_data)
+            self.client.analyse(self.conversation_data)
 
-    @patch('convolens.client.requests.post')
-    def test_analyse_other_error(self, mock_post):
-        mock_response = unittest.mock.Mock()
+    @patch("aethra.client.requests.post")
+    def test_analyse_analysis_error(self, mock_post):
+        """Test analysis error with malformed response."""
+        mock_response = MagicMock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = {"invalid_key": "unexpected_data"}
+        mock_post.return_value = mock_response
+
+        with self.assertRaises(AnalysisError):
+            self.client.analyse(self.conversation_data)
+
+    @patch("aethra.client.requests.post")
+    def test_analyse_api_error(self, mock_post):
+        """Test generic API error."""
+        mock_response = MagicMock()
         mock_response.status_code = 500
         mock_response.text = "Internal Server Error"
         mock_post.return_value = mock_response
 
-        with self.assertRaises(AethraClient):
-            self.client.analyse(conversation_data=self.conversation_data)
+        with self.assertRaises(Exception) as context:
+            self.client.analyse(self.conversation_data)
+        
+        self.assertIn("Error 500", str(context.exception))
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()
