@@ -1,6 +1,10 @@
-# Aethra python package 
+Here’s the updated README file with the corrected code to include the `base_url` parameter when initializing the `AethraClient`:
 
-**Aethra** is a Python client library that provides a simple interface to your FastAPI-powered conversation analysis API. It allows developers to easily submit conversation data for clustering and analysis **without** needing to configure the API’s base URL.
+---
+
+# Aethra Python Package 
+
+**Aethra** is a Python client library that provides a simple interface to your FastAPI-powered conversation analysis API. It allows developers to easily submit conversation data for clustering and analysis.
 
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
 
@@ -23,7 +27,7 @@
 ## Features
 
 - **Simple API Client**: Quickly send conversation data for clustering and analysis.
-- **No Base URL Configuration**: Base URL is defined in the library; users only need to supply an API key.
+- **Customizable Base URL**: Specify the API's base URL during client initialization.
 - **Custom Exceptions**: Detailed exception classes (`InvalidAPIKeyError`, `InsufficientCreditsError`, etc.) for better error handling.
 - **Pydantic Models**: Uses Pydantic for data validation and serialization.
 - **Easy Integration**: Designed to integrate seamlessly with existing Python codebases.
@@ -62,17 +66,16 @@
 ### Basic Setup
 
 1. **Obtain an API Key**  
-   Make sure you have a valid API key for your FastAPI service. You only need to provide this API key, because the library itself handles all details about the endpoint base URL.
+   Make sure you have a valid API key for your FastAPI service. You need to provide this API key and the base URL of the API.
 
 2. **Import the Client**
    ```python
-   from Aethra.client import AethraClient
+   from aethra.client import AethraClient
    ```
 
 3. **Initialize the Client**
    ```python
-   # The base URL is configured inside the library and cannot be changed by users
-   client = AethraClient(api_key="your_api_key_here")
+   client = AethraClient(api_key="your_api_key_here", base_url="http://your-api-base-url")
    ```
 
 ---
@@ -82,7 +85,7 @@
 Below is a simple script that demonstrates sending a conversation for analysis:
 
 ```python
-from aethra import AethraClient
+from aethra.client import AethraClient
 from aethra.exceptions import (
     InvalidAPIKeyError,
     InsufficientCreditsError,
@@ -91,11 +94,12 @@ from aethra.exceptions import (
 )
 
 def main():
-    # Replace with your actual API key
+    # Replace with your actual API key and base URL
     api_key = "your_api_key_here"
+    base_url = "base_url"
 
-    # Initialize the client (base URL is internal, no need to specify)
-    client = AethraClient(api_key=api_key)
+    # Initialize the client
+    client = AethraClient(api_key=api_key, base_url=base_url)
 
     # Example conversation data
     conversation_data = {
@@ -207,3 +211,7 @@ If you have questions, suggestions, or issues, feel free to open an issue on the
 ---
 
 _Thank you for using Aethra! We look forward to seeing how you integrate it into your projects._
+
+---
+
+This updated README ensures that the `base_url` parameter is explicitly provided when initializing the `AethraClient`. Let me know if further refinements are needed!
