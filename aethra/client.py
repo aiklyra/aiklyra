@@ -10,6 +10,7 @@ from .exceptions import (
 
 
 class AethraClient:
+    BASE_ANALYSE_ENDPOINT = "conversation-flow-analysis/base_analyse-conversation-flow"
     def __init__(self, api_key: str, base_url: str = "http://localhost:8002"):
         """
         Initialize the ConvoLens client.
@@ -30,9 +31,7 @@ class AethraClient:
         conversation_data: Dict[str, List[Dict[str, str]]],
         min_clusters: int = 5,
         max_clusters: int = 10,
-        embedding_model: str = "text-embedding-ada-002",
         top_k_nearest_to_centroid: int = 10,
-        tau: float = 0.1
     ) -> ConversationFlowAnalysisResponse:
         """
         Analyze conversation flow.
@@ -41,10 +40,7 @@ class AethraClient:
             conversation_data (Dict[str, List[Dict[str, str]]]): The conversation data.
             min_clusters (int, optional): Minimum number of clusters. Defaults to 5.
             max_clusters (int, optional): Maximum number of clusters. Defaults to 10.
-            embedding_model (str, optional): Embedding model to use. Defaults to "text-embedding-ada-002".
             top_k_nearest_to_centroid (int, optional): Top K nearest to centroid. Defaults to 10.
-            tau (float, optional): Tau value. Defaults to 0.1.
-
         Returns:
             ConversationFlowAnalysisResponse: The analysis result.
 
@@ -54,14 +50,19 @@ class AethraClient:
             AnalysisError: If the analysis fails.
             ConvoLensAPIError: For other API-related errors.
         """
-        url = f"{self.base_url}/conversation-flow-analysis/analyse-conversation-flow"
+        if not isinstance(conversation_data, dict):
+            raise ValueError("conversation_data must be a dictionary.")
+        if min_clusters <= 0 or max_clusters <= 0:
+            raise ValueError("min_clusters and max_clusters must be positive integers.")
+        if min_clusters > max_clusters:
+            raise ValueError("Max clusters needs to be greater than Min Clusters")
+
+        url = f"{self.base_url}/conversation-flow-analysis/{AethraClient.BASE_ANALYSE_ENDPOINT}"
         payload = ConversationFlowAnalysisRequest(
             conversation_data=conversation_data,
             min_clusters=min_clusters,
             max_clusters=max_clusters,
-            embedding_model=embedding_model,
             top_k_nearest_to_centroid=top_k_nearest_to_centroid,
-            tau=tau
         ).model_dump()
 
         try:
