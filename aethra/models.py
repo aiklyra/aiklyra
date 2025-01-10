@@ -9,9 +9,7 @@ class ConversationFlowAnalysisRequest(BaseModel):
     conversation_data: Dict[str, List[Utterance]]
     min_clusters: Optional[int] = Field(default=5)
     max_clusters: Optional[int] = Field(default=10)
-    embedding_model: str = Field(default="text-embedding-ada-002")
     top_k_nearest_to_centroid: int = Field(default=10)
-    tau: float = Field(default=0.1)
 
 class ConversationFlowAnalysisResponse(BaseModel):
     transition_matrix: List[List[float]]
