@@ -1,6 +1,6 @@
 import networkx as nx
 from typing import Callable, Dict, List, Optional
-
+from filters import BaseGraphFilter
 class GraphProcessor:
     def __init__(self, transition_matrix: List[List[float]], intent_by_cluster: Dict[int, str]):
         """
@@ -24,17 +24,17 @@ class GraphProcessor:
         nx.set_node_attributes(graph, self.intent_by_cluster, "intent")
         return graph
 
-    def filter_graph(self, filter_strategy: Callable[[nx.DiGraph], nx.DiGraph]) -> nx.DiGraph:
+    def filter_graph(self, filter_strategy: BaseGraphFilter) -> nx.DiGraph:
         """
         Apply a filter strategy to the graph.
 
         Args:
-            filter_strategy (Callable[[nx.DiGraph], nx.DiGraph]): A function that filters the graph.
+            filter_strategy (BaseGraphFilter): A GraphFilter instance of a class inheriting from BaseGraphFilter.
 
         Returns:
             nx.DiGraph: The filtered graph.
         """
-        return filter_strategy(self.graph)
+        return filter_strategy.apply(self.graph)
 
     def visualize_graph(self, graph: Optional[nx.DiGraph] = None) -> None:
         """
