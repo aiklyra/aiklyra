@@ -57,7 +57,7 @@ class AethraClient:
         if min_clusters > max_clusters:
             raise ValueError("Max clusters needs to be greater than Min Clusters")
 
-        url = f"{self.base_url}/conversation-flow-analysis/{AethraClient.BASE_ANALYSE_ENDPOINT}"
+        url = f"{self.base_url}/{AethraClient.BASE_ANALYSE_ENDPOINT}"
         payload = ConversationFlowAnalysisRequest(
             conversation_data=conversation_data,
             min_clusters=min_clusters,

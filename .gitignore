@@ -170,3 +170,5 @@ cython_debug/
 # PyPI configuration file
 .pypirc
 test_env
+package_test
+tutorials
