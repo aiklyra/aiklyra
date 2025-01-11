@@ -11,18 +11,19 @@ from .exceptions import (
 
 class AethraClient:
     BASE_ANALYSE_ENDPOINT = "conversation-flow-analysis/base_analyse-conversation-flow"
+
     def __init__(self, api_key: str, base_url: str = "http://localhost:8002"):
         """
-        Initialize the ConvoLens client.
+        Initialize the Aethra client.
 
         Args:
             api_key (str): The user's API key.
-            base_url (str, optional): The base URL of the ConvoLens API. Defaults to "http://localhost:8002".
+            base_url (str, optional): The base URL of the Aethra API. Defaults to "http://localhost:8002".
         """
         self.api_key = api_key
         self.base_url = base_url.rstrip('/')
         self.headers = {
-            "X-API-Key": self.api_key,
+            "Authorization": f"Bearer {self.api_key}",  # Use Authorization header
             "Content-Type": "application/json"
         }
 
@@ -48,7 +49,7 @@ class AethraClient:
             InvalidAPIKeyError: If the API key is invalid.
             InsufficientCreditsError: If the user has insufficient credits.
             AnalysisError: If the analysis fails.
-            ConvoLensAPIError: For other API-related errors.
+            AethraAPIError: For other API-related errors.
         """
         if not isinstance(conversation_data, dict):
             raise ValueError("conversation_data must be a dictionary.")
