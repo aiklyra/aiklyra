@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='aethra',
-    version='0.1.0',
+    version='0.1.1',
     author='Aethra',
     author_email='achref.benammar@ieee.org',
     description='A Python client library for Aethra API',
@@ -12,8 +12,10 @@ setup(
     packages=find_packages(),
     install_requires=[
         'requests>=2.25.1',
-        'pydantic>=2.0.0',
-        'python-dotenv>=0.15.0'
+        'pydantic>=1.8.2',
+        'python-dotenv>=0.15.0',
+        'networkx==3.4.2',
+        'numpy==2.2.1'
     ],
     license='Apache License 2.0',
     classifiers=[
