@@ -1,13 +1,15 @@
 from .base_filter import BaseGraphFilter
 import networkx as nx
+import numpy as np
+from typing import Dict
 
 class TopKFilter(BaseGraphFilter):
     """
-    A filter that keeps only the top K edges for each node in a directed graph,
+    A filter that retains only the top K outgoing edges for each node in a directed graph,
     based on edge weights.
 
     Attributes:
-        top_k (int): The maximum number of outgoing edges to keep for each node.
+        top_k (int): The maximum number of outgoing edges to retain for each node.
     """
 
     def __init__(self, top_k: int):
@@ -15,24 +17,34 @@ class TopKFilter(BaseGraphFilter):
         Initialize the TopKFilter.
 
         Args:
-            top_k (int): The number of top edges to retain for each node, 
-                         based on their weights.
+            top_k (int): The number of top outgoing edges to retain for each node.
+                         Edges are ranked based on their 'weight' attribute in descending order.
         """
         self.top_k = top_k
 
-    def apply(self, graph: nx.DiGraph) -> nx.DiGraph:
+    def apply(self, graph: nx.DiGraph, transition_matrix: np.ndarray, intent_by_cluster: Dict) -> nx.DiGraph:
         """
         Apply the TopK filter to a directed graph.
 
-        This method creates a copy of the input graph and retains only the top K
-        outgoing edges for each node, based on edge weights.
+        This method processes the input graph and retains only the top K outgoing edges 
+        for each node, sorted by their weights in descending order. It creates a new 
+        filtered graph without modifying the original.
 
         Args:
-            graph (nx.DiGraph): The directed graph to filter. Each edge in the graph
-                                is expected to have a 'weight' attribute.
+            graph (nx.DiGraph): The directed graph to filter. Each edge is expected 
+                                to have a 'weight' attribute.
+            transition_matrix (np.ndarray): The transition matrix representing the 
+                                            probabilities between nodes.
+            intent_by_cluster (Dict): Mapping of cluster IDs to their intent descriptions. 
+                                      This may optionally be used for additional processing.
 
         Returns:
-            nx.DiGraph: A new graph with only the top K edges per node retained.
+            nx.DiGraph: A new directed graph with only the top K outgoing edges 
+                        per node retained.
+
+        Raises:
+            ValueError: If `top_k` is not a positive integer or if the graph contains nodes
+                        without a 'weight' attribute on edges.
 
         Example:
             >>> import networkx as nx
@@ -42,7 +54,7 @@ class TopKFilter(BaseGraphFilter):
             >>> graph.add_edge(0, 3, weight=0.8)
             >>> graph.add_edge(1, 2, weight=0.3)
             >>> filter = TopKFilter(top_k=2)
-            >>> filtered_graph = filter.apply(graph)
+            >>> filtered_graph = filter.apply(graph, None, None)
             >>> list(filtered_graph.edges(data=True))
             [(0, 3, {'weight': 0.8}), (0, 1, {'weight': 0.5}), (1, 2, {'weight': 0.3})]
         """
