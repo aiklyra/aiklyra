@@ -1,6 +1,7 @@
 import networkx as nx
 from typing import Callable, Dict, List, Optional
 from filters import BaseGraphFilter
+import numpy as np 
 class GraphProcessor:
     def __init__(self, transition_matrix: List[List[float]], intent_by_cluster: Dict[int, str]):
         """
@@ -34,7 +35,9 @@ class GraphProcessor:
         Returns:
             nx.DiGraph: The filtered graph.
         """
-        return filter_strategy.apply(self.graph)
+        transition_matrix_array = np.array(self.transition_matrix) if not isinstance(self.transition_matrix, np.ndarray) else self.transition_matrix
+
+        return filter_strategy.apply(self.graph, transition_matrix_array, self.intent_by_cluster)
 
     def visualize_graph(self, graph: Optional[nx.DiGraph] = None) -> None:
         """
