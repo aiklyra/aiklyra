@@ -15,7 +15,8 @@ setup(
         'pydantic>=1.8.2',
         'python-dotenv>=0.15.0',
         'networkx==3.4.2',
-        'numpy==2.2.1'
+        'numpy<2.0',
+        'matplotlib<=3.10.0'
     ],
     license='Apache License 2.0',
     classifiers=[
