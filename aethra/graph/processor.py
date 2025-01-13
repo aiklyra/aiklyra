@@ -1,6 +1,6 @@
 import networkx as nx
 from typing import Callable, Dict, List, Optional
-from filters import BaseGraphFilter
+from aethra.graph.filters.base_filter import BaseGraphFilter
 import numpy as np 
 class GraphProcessor:
     def __init__(self, transition_matrix: List[List[float]], intent_by_cluster: Dict[int, str]):
@@ -18,11 +18,15 @@ class GraphProcessor:
     def _construct_graph(self) -> nx.DiGraph:
         """Construct a directed graph from the transition matrix."""
         graph = nx.DiGraph()
-        for i, row in enumerate(self.transition_matrix):
-            for j, weight in enumerate(row):
-                if weight > 0: 
-                    graph.add_edge(i, j, weight=weight)
-        nx.set_node_attributes(graph, self.intent_by_cluster, "intent")
+
+        for intent in self.intent_by_cluster.values():
+            graph.add_node(intent)
+
+        for i, from_intent in self.intent_by_cluster.items():
+            weights = self.transition_matrix[int(i)]
+            for j, weight in enumerate(weights):
+                to_intent = self.intent_by_cluster[int(j)]
+                graph.add_edge(from_intent, to_intent, weight=weight)
         return graph
 
     def filter_graph(self, filter_strategy: BaseGraphFilter) -> nx.DiGraph:
