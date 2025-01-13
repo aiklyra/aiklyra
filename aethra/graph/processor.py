@@ -1,6 +1,6 @@
 import networkx as nx
 from typing import Callable, Dict, List, Optional
-from filters import BaseGraphFilter
+from aethra.graph.filters.base_filter import BaseGraphFilter
 import numpy as np 
 class GraphProcessor:
     def __init__(self, transition_matrix: List[List[float]], intent_by_cluster: Dict[int, str]):
