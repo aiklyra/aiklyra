@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='aethra',
-    version='0.1.3',
+    version='0.1.4',
     author='Aethra',
     author_email='achref.benammar@ieee.org',
     description='A Python client library for Aethra API',
