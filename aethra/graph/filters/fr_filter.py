@@ -125,7 +125,7 @@ class FRFilter(BaseGraphFilter):
 
         return filtered_graph
 
-    def _remove_weakest_edge_in_cycles(G: nx.DiGraph) -> nx.DiGraph:
+    def _remove_weakest_edge_in_cycles(self , G: nx.DiGraph) -> nx.DiGraph:
         """
         Detect and remove the weakest edge in cycles within a graph.
 
@@ -156,6 +156,7 @@ class FRFilter(BaseGraphFilter):
         return G
 
     def _reconnect_subgraphs(
+        self , 
         G: nx.DiGraph, 
         transition_matrix: np.ndarray, 
         intent_by_cluster: Dict[str, str]
