@@ -35,7 +35,7 @@ class TestGraphProcessingAndFiltering(unittest.TestCase):
         """
         # Apply a threshold filter
         threshold_filter = ThresholdFilter(threshold=0.3)
-        filtered_graph = threshold_filter.apply(self.graph)
+        filtered_graph = threshold_filter.apply(self.graph , self.transition_matrix , self.intent_by_cluster)
 
         # Check edges in the filtered graph
         expected_edges = [("Node A", "Node B", {"weight": 0.5}),
@@ -63,7 +63,7 @@ class TestGraphProcessingAndFiltering(unittest.TestCase):
         """
         # Step 1: Apply ThresholdFilter
         threshold_filter = ThresholdFilter(threshold=0.3)
-        filtered_graph = threshold_filter.apply(self.graph)
+        filtered_graph = threshold_filter.apply(self.graph , self.transition_matrix , self.intent_by_cluster)
 
         # Step 2: Apply FRFilter
         fr_filter = FRFilter(min_weight=0.3, top_k=2)
@@ -88,7 +88,7 @@ class TestGraphProcessingAndFiltering(unittest.TestCase):
 
         # Apply ThresholdFilter
         threshold_filter = ThresholdFilter(threshold=1)
-        filtered_graph = threshold_filter.apply(empty_graph)
+        filtered_graph = threshold_filter.apply(empty_graph , self.transition_matrix, self.intent_by_cluster)
 
         # Validate the result is still an empty graph
         self.assertTrue(filtered_graph.number_of_nodes() == 0 and filtered_graph.number_of_edges() == 0)
