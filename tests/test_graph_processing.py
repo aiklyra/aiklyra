@@ -24,9 +24,9 @@ class TestGraphProcessingAndFiltering(unittest.TestCase):
             [0.1, 0.0, 0.0]
         ])
         self.intent_by_cluster = {
-            "0": "Node A",
-            "1": "Node B",
-            "2": "Node C"
+            0: "Node A",
+            1: "Node B",
+            2: "Node C"
         }
 
     def test_threshold_filter(self):
