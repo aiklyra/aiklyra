@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='aethra',
-    version='0.1.5',
+    version='0.1.6',
     author='Aethra',
     author_email='achref.benammar@ieee.org',
     description='A Python client library for Aethra API',
@@ -16,7 +16,8 @@ setup(
         'python-dotenv>=0.15.0',
         'networkx==3.4.2',
         'numpy<2.0',
-        'matplotlib<=3.10.0'
+        'matplotlib<=3.10.0',
+        'pyvis==0.3.2'
     ],
     license='Apache License 2.0',
     classifiers=[
