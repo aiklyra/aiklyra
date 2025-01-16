@@ -1,20 +1,21 @@
 import networkx as nx
 from typing import Callable, Dict, List, Optional
 from aethra.graph.filters.base_filter import BaseGraphFilter
+from aethra.models import ConversationFlowAnalysisResponse 
 from pyvis.network import Network
 import numpy as np 
 import os 
 class GraphProcessor:
-    def __init__(self, transition_matrix: List[List[float]], intent_by_cluster: Dict[int, str]):
+    def __init__(self, analysis: ConversationFlowAnalysisResponse):
         """
-        Initialize the GraphProcessor with the transition matrix and intent-to-cluster mapping.
+        Initialize the GraphProcessor with the analysis response.
 
         Args:
-            transition_matrix (List[List[float]]): The transition matrix from the API.
-            intent_by_cluster (Dict[int, str]): Mapping of intent cluster IDs to descriptions.
+            analysis (ConversationFlowAnalysisResponse): The response object containing transition matrix 
+                                                        and intent-to-cluster mapping.
         """
-        self.transition_matrix = transition_matrix
-        self.intent_by_cluster = intent_by_cluster
+        self.transition_matrix = analysis.transition_matrix
+        self.intent_by_cluster = analysis.intent_by_cluster
         self.graph = self._construct_graph()
 
     def _construct_graph(self) -> nx.DiGraph:
