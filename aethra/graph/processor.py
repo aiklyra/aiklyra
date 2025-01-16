@@ -45,11 +45,11 @@ class GraphProcessor:
         transition_matrix_array = np.array(self.transition_matrix) if not isinstance(self.transition_matrix, np.ndarray) else self.transition_matrix
 
         new_graph = filter_strategy.apply(self.graph, transition_matrix_array, self.intent_by_cluster)
-        self.intent_by_cluster , self.transition_matrix = GraphProcessor.extract_intent_and_matrix_from_graph(new_graph)
+        self.intent_by_cluster , self.transition_matrix = self.extract_intent_and_matrix_from_graph(new_graph)
         self.graph = new_graph 
         return self.graph 
-    @classmethod
-    def extract_intent_and_matrix_from_graph(graph: nx.DiGraph):
+
+    def extract_intent_and_matrix_from_graph(self , graph: nx.DiGraph):
         """
         Given a filtered DiGraph, extract:
         - a new intent_by_cluster dict
