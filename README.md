@@ -1,6 +1,6 @@
 # Aethra Python Package 
 
-**Aethra** is a Python client library that provides a simple interface to your FastAPI-powered conversation analysis API. It allows developers to easily submit conversation data for clustering and analysis.
+**Aethra** is a Python client library that provides a simple interface to your FastAPI-powered conversation analysis API. It allows developers to easily submit conversation data for clustering, analysis, and graph processing.
 
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
 
@@ -12,6 +12,7 @@
 - [Installation](#installation)
 - [Usage](#usage)
 - [Example](#example)
+- [Graph Processing and Visualization](#graph-processing-and-visualization)
 - [Testing](#testing)
 - [Development](#development)
 - [License](#license)
@@ -23,6 +24,8 @@
 ## Features
 
 - **Simple API Client**: Quickly send conversation data for clustering and analysis.
+- **Graph Processing**: Construct, filter, and visualize directed graphs representing conversation flows.
+- **Customizable Filters**: Apply graph filtering strategies like thresholding, top-K filtering, and advanced reconnecting filters.
 - **Customizable Base URL**: Specify the API's base URL during client initialization.
 - **Custom Exceptions**: Detailed exception classes (`InvalidAPIKeyError`, `InsufficientCreditsError`, etc.) for better error handling.
 - **Pydantic Models**: Uses Pydantic for data validation and serialization.
@@ -32,7 +35,7 @@
 
 ## Installation
 
-1. **Clone or Download the Repository** (if you haven’t already):
+1. **Clone or Download the Repository**:
    ```bash
    git clone https://github.com/AethraData/aethra.git
    cd Aethra
@@ -53,7 +56,8 @@
 > - Python 3.8+  
 > - [requests](https://pypi.org/project/requests/)  
 > - [pydantic](https://pypi.org/project/pydantic/)  
-> - [python-dotenv](https://pypi.org/project/python-dotenv/)
+> - [networkx](https://pypi.org/project/networkx/)  
+> - [pyvis](https://pypi.org/project/pyvis/)
 
 ---
 
@@ -92,7 +96,7 @@ from aethra.exceptions import (
 def main():
     # Replace with your actual API key and base URL
     api_key = "your_api_key_here"
-    base_url = "base_url"
+    base_url = "http://your-api-base-url"
 
     # Initialize the client
     client = AethraClient(api_key=api_key, base_url=base_url)
@@ -108,22 +112,16 @@ def main():
             {"role": "user", "content": "Can I change my subscription plan?"},
             {"role": "agent", "content": "Yes, you can change it from the settings page. Would you like me to guide you through the process?"},
             {"role": "user", "content": "That would be helpful. Thank you."}
-        ],
-        "conversation_3": [
-            {"role": "user", "content": "How can I reset my password?"},
-            {"role": "agent", "content": "To reset your password, click on 'Forgot Password' on the login page and follow the instructions."},
-            {"role": "user", "content": "Got it, thanks."}
         ]
     }
 
     try:
+        # Perform analysis
         response = client.analyse(
             conversation_data=conversation_data,
             min_clusters=5,
             max_clusters=10,
-            embedding_model="text-embedding-ada-002",
-            top_k_nearest_to_centroid=10,
-            tau=0.1
+            top_k_nearest_to_centroid=10
         )
         print("Analysis Result:")
         print(response)
@@ -149,9 +147,60 @@ python example_usage.py
 
 ---
 
+## Graph Processing and Visualization
+
+### Graph Construction
+
+The analysis response can be processed into a directed graph using `GraphProcessor`:
+
+```python
+from aethra.graph.processor import GraphProcessor
+
+# Assuming 'response' is a ConversationFlowAnalysisResponse object
+graph_processor = GraphProcessor(analysis=response)
+
+# Access the constructed graph
+graph = graph_processor.graph
+```
+
+### Graph Filtering
+
+Apply filters to refine the graph. Available filters include:
+- `ThresholdFilter`: Removes edges with weights below a specified threshold.
+- `TopKFilter`: Retains only the top-K outgoing edges for each node.
+- `FRFilter`: Advanced filtering strategy that removes cycles and reconnects subgraphs.
+
+Example:
+
+```python
+from aethra.graph.filters import ThresholdFilter, TopKFilter
+
+# Apply a threshold filter
+threshold_filter = ThresholdFilter(threshold=0.3)
+filtered_graph = graph_processor.filter_graph(threshold_filter)
+
+# Apply a top-K filter
+topk_filter = TopKFilter(top_k=3)
+filtered_graph = graph_processor.filter_graph(topk_filter)
+```
+
+### Visualization
+
+Visualize the graph using PyVis or NetworkX:
+
+```python
+# PyVis visualization
+graph_processor.plot_graph_html(file_name="conversation_flow")
+
+# NetworkX visualization
+graph_processor.visualize_graph()
+```
+
+---
+
 ## Testing
 
-1. **Install Development Dependencies** (if you have a `requirements-dev.txt` or similar):
+1. **Install Development Dependencies**:
    ```bash
    pip install -r requirements.txt
    ```
@@ -162,9 +211,8 @@ python example_usage.py
    ```
    or
    ```bash
-   python ./tests/test_client.py
+   pytest
    ```
-   You should see output indicating successful tests or any failures with detailed information.
 
 ---
 
