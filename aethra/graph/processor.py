@@ -41,7 +41,37 @@ class GraphProcessor:
         """
         transition_matrix_array = np.array(self.transition_matrix) if not isinstance(self.transition_matrix, np.ndarray) else self.transition_matrix
 
-        return filter_strategy.apply(self.graph, transition_matrix_array, self.intent_by_cluster)
+        new_graph = filter_strategy.apply(self.graph, transition_matrix_array, self.intent_by_cluster)
+        self.intent_by_cluster , self.transition_matrix = GraphProcessor.extract_intent_and_matrix_from_graph(new_graph)
+        self.graph = new_graph 
+        return self.graph 
+    @classmethod
+    def extract_intent_and_matrix_from_graph(graph: nx.DiGraph):
+        """
+        Given a filtered DiGraph, extract:
+        - a new intent_by_cluster dict
+        - a new transition matrix
+
+        Returns:
+            new_intent_by_cluster (dict): Maps new index -> intent (node).
+            new_transition_matrix (np.ndarray): 2D matrix of edge weights.
+        """
+        nodes = list(graph.nodes())
+
+        node_to_index = {node: idx for idx, node in enumerate(nodes)}
+
+        intent_by_cluster = {idx: node for idx, node in enumerate(nodes)}
+
+        size = len(nodes)
+        transition_matrix = np.zeros((size, size), dtype=float)
+
+        for u, v, data in graph.edges(data=True):
+            i = node_to_index[u]
+            j = node_to_index[v]
+            weight = data.get("weight", 0.0)
+            transition_matrix[i, j] = weight
+
+        return intent_by_cluster, transition_matrix 
 
     def visualize_graph(self, graph: Optional[nx.DiGraph] = None) -> None:
         """
