@@ -100,7 +100,7 @@ class FRFilter(BaseGraphFilter):
             weights = transition_matrix[int(i)]
             for j, weight in enumerate(weights):
                 if weight >= self.min_weight and int(i) != int(j):
-                    to_intent = intent_by_cluster[str(j)]
+                    to_intent = intent_by_cluster[j]
                     filtered_graph.add_edge(from_intent, to_intent, weight=weight)
 
         # Keep only the top-k edges for each node
