@@ -4,3 +4,4 @@ python-dotenv>=0.15.0
 networkx>=3.4
 numpy<2.0
 matplotlib<=3.10.0
+pyvis==0.3.2
