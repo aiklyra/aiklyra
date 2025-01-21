@@ -23,7 +23,7 @@ class AiklyraClient:
         self.api_key = api_key
         self.base_url = base_url.rstrip('/')
         self.headers = {
-            "Authorization": f"Bearer {self.api_key}",  # Use Authorization header
+            "Authorization": f"Bearer {self.api_key}", 
             "Content-Type": "application/json"
         }
 
@@ -33,6 +33,7 @@ class AiklyraClient:
         min_clusters: int = 5,
         max_clusters: int = 10,
         top_k_nearest_to_centroid: int = 10,
+        role : str = "Any"
     ) -> ConversationFlowAnalysisResponse:
         """
         Analyze conversation flow.
@@ -42,6 +43,7 @@ class AiklyraClient:
             min_clusters (int, optional): Minimum number of clusters. Defaults to 5.
             max_clusters (int, optional): Maximum number of clusters. Defaults to 10.
             top_k_nearest_to_centroid (int, optional): Top K nearest to centroid. Defaults to 10.
+            role (str, optional): Role to be analyzed in the conversations/behaviour track. Defaults to "Any".
         Returns:
             ConversationFlowAnalysisResponse: The analysis result.
 
@@ -58,12 +60,20 @@ class AiklyraClient:
         if min_clusters > max_clusters:
             raise ValueError("Max clusters needs to be greater than Min Clusters")
 
+        if role != "Any":
+            filtered_by_role = {}
+            for conv_id , conv in conversation_data.items():
+                filtered_by_role[conv_id] = [msg for msg in conv if msg["role"] == role]
+            conversation_data = filtered_by_role
+        
+        
         url = f"{self.base_url}/{AiklyraClient.BASE_ANALYSE_ENDPOINT}"
         payload = ConversationFlowAnalysisRequest(
             conversation_data=conversation_data,
             min_clusters=min_clusters,
             max_clusters=max_clusters,
             top_k_nearest_to_centroid=top_k_nearest_to_centroid,
+            role = role
         ).model_dump()
 
         try:
