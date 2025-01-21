@@ -3,7 +3,7 @@ import json
 from unittest.mock import patch, MagicMock
 import numpy as np
 from difflib import SequenceMatcher
-from aethra import AethraClient, GraphProcessor, FRFilter
+from aiklyra import AiklyraClient, GraphProcessor, FRFilter
 
 
 @pytest.fixture
@@ -61,19 +61,19 @@ def assert_intent_similarity(expected_intents, actual_intents, threshold=0.8):
         )
 
 
-@patch("aethra.client.requests.post")
+@patch("aiklyra.client.requests.post")
 def test_overall_library_with_tolerance(mock_post, mock_conversation_data, mock_analysis_response):
     """
     Integration test for the overall library functionality with stochasticity handling.
     """
-    # Mock AethraClient API response
+    # Mock AiklyraClient API response
     mock_response = MagicMock()
     mock_response.status_code = 200
     mock_response.json.return_value = mock_analysis_response
     mock_post.return_value = mock_response
 
-    # Initialize the AethraClient
-    client = AethraClient(
+    # Initialize the AiklyraClient
+    client = AiklyraClient(
         api_key="mock_api_key",
         base_url="http://localhost:8002/"
     )
