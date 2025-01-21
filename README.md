@@ -1,6 +1,6 @@
-# Aethra Python Package 
+# Aiklyra Python Package 
 
-**Aethra** is a Python client library that provides a simple interface to your FastAPI-powered conversation analysis API. It allows developers to easily submit conversation data for clustering, analysis, and graph processing.
+**Aiklyra** is a Python client library that provides a simple interface to your FastAPI-powered conversation analysis API. It allows developers to easily submit conversation data for clustering, analysis, and graph processing.
 
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
 
@@ -37,8 +37,8 @@
 
 1. **Clone or Download the Repository**:
    ```bash
-   git clone https://github.com/AethraData/aethra.git
-   cd Aethra
+   git clone https://github.com/AiklyraData/aiklyra.git
+   cd Aiklyra
    ```
 
 2. **Install via `setup.py`**:
@@ -70,12 +70,12 @@
 
 2. **Import the Client**
    ```python
-   from aethra.client import AethraClient
+   from aiklyra.client import AiklyraClient
    ```
 
 3. **Initialize the Client**
    ```python
-   client = AethraClient(api_key="your_api_key_here", base_url="http://your-api-base-url")
+   client = AiklyraClient(api_key="your_api_key_here", base_url="http://your-api-base-url")
    ```
 
 ---
@@ -85,12 +85,12 @@
 Below is a simple script that demonstrates sending a conversation for analysis:
 
 ```python
-from aethra.client import AethraClient
-from aethra.exceptions import (
+from aiklyra.client import AiklyraClient
+from aiklyra.exceptions import (
     InvalidAPIKeyError,
     InsufficientCreditsError,
     AnalysisError,
-    AethraAPIError
+    AiklyraAPIError
 )
 
 def main():
@@ -99,7 +99,7 @@ def main():
     base_url = "http://your-api-base-url"
 
     # Initialize the client
-    client = AethraClient(api_key=api_key, base_url=base_url)
+    client = AiklyraClient(api_key=api_key, base_url=base_url)
 
     # Example conversation data
     conversation_data = {
@@ -132,7 +132,7 @@ def main():
         print("Insufficient credits for analysis.")
     except AnalysisError as e:
         print(f"Analysis failed: {e}")
-    except AethraAPIError as e:
+    except AiklyraAPIError as e:
         print(f"API Error: {e}")
 
 if __name__ == "__main__":
@@ -154,7 +154,7 @@ python example_usage.py
 The analysis response can be processed into a directed graph using `GraphProcessor`:
 
 ```python
-from aethra.graph.processor import GraphProcessor
+from aiklyra.graph.processor import GraphProcessor
 
 # Assuming 'response' is a ConversationFlowAnalysisResponse object
 graph_processor = GraphProcessor(analysis=response)
@@ -173,7 +173,7 @@ Apply filters to refine the graph. Available filters include:
 Example:
 
 ```python
-from aethra.graph.filters import ThresholdFilter, TopKFilter
+from aiklyra.graph.filters import ThresholdFilter, TopKFilter
 
 # Apply a threshold filter
 threshold_filter = ThresholdFilter(threshold=0.3)
@@ -254,4 +254,4 @@ If you have questions, suggestions, or issues, feel free to open an issue on the
 
 ---
 
-_Thank you for using Aethra! We look forward to seeing how you integrate it into your projects._
+_Thank you for using Aiklyra! We look forward to seeing how you integrate it into your projects._
