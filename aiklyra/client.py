@@ -2,23 +2,23 @@ import requests
 from typing import Dict, List, Union
 from .models import ConversationFlowAnalysisRequest, ConversationFlowAnalysisResponse
 from .exceptions import (
-    AethraAPIError,
+    AiklyraAPIError,
     InvalidAPIKeyError,
     InsufficientCreditsError,
     AnalysisError
 )
 
 
-class AethraClient:
+class AiklyraClient:
     BASE_ANALYSE_ENDPOINT = "conversation-flow-analysis/base_analyse-conversation-flow"
 
     def __init__(self, api_key: str, base_url: str = "http://localhost:8002"):
         """
-        Initialize the Aethra client.
+        Initialize the Aiklyra client.
 
         Args:
             api_key (str): The user's API key.
-            base_url (str, optional): The base URL of the Aethra API. Defaults to "http://localhost:8002".
+            base_url (str, optional): The base URL of the Aiklyra API. Defaults to "http://localhost:8002".
         """
         self.api_key = api_key
         self.base_url = base_url.rstrip('/')
@@ -49,7 +49,7 @@ class AethraClient:
             InvalidAPIKeyError: If the API key is invalid.
             InsufficientCreditsError: If the user has insufficient credits.
             AnalysisError: If the analysis fails.
-            AethraAPIError: For other API-related errors.
+            AiklyraAPIError: For other API-related errors.
         """
         if not isinstance(conversation_data, dict):
             raise ValueError("conversation_data must be a dictionary.")
@@ -58,7 +58,7 @@ class AethraClient:
         if min_clusters > max_clusters:
             raise ValueError("Max clusters needs to be greater than Min Clusters")
 
-        url = f"{self.base_url}/{AethraClient.BASE_ANALYSE_ENDPOINT}"
+        url = f"{self.base_url}/{AiklyraClient.BASE_ANALYSE_ENDPOINT}"
         payload = ConversationFlowAnalysisRequest(
             conversation_data=conversation_data,
             min_clusters=min_clusters,
@@ -69,7 +69,7 @@ class AethraClient:
         try:
             response = requests.post(url, headers=self.headers, json=payload)
         except requests.RequestException as e:
-            raise AethraAPIError(f"Request failed: {e}")
+            raise AiklyraAPIError(f"Request failed: {e}")
 
         if response.status_code == 200:
             try:
@@ -83,6 +83,6 @@ class AethraClient:
             elif "Insufficient credits" in detail:
                 raise InsufficientCreditsError("Insufficient credits.")
             else:
-                raise AethraAPIError(f"Forbidden: {detail}")
+                raise AiklyraAPIError(f"Forbidden: {detail}")
         else:
-            raise AethraAPIError(f"Error {response.status_code}: {response.text}")
+            raise AiklyraAPIError(f"Error {response.status_code}: {response.text}")

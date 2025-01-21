@@ -1,11 +1,11 @@
 import pytest
 from unittest.mock import patch, MagicMock
-from aethra.client import (
-    AethraClient,
+from aiklyra.client import (
+    AiklyraClient,
     InvalidAPIKeyError,
     InsufficientCreditsError,
     AnalysisError,
-    AethraAPIError,
+    AiklyraAPIError,
     ConversationFlowAnalysisRequest,
     ConversationFlowAnalysisResponse,
 )
@@ -18,7 +18,7 @@ def setup_client():
     """
     api_key = "test_api_key"
     base_url = "http://localhost:8002"
-    client = AethraClient(api_key=api_key, base_url=base_url)
+    client = AiklyraClient(api_key=api_key, base_url=base_url)
     conversation_data = {
         "session_1": [
             {"role": "user", "content": "Hello"},
@@ -28,7 +28,7 @@ def setup_client():
     return client, conversation_data
 
 
-@patch("aethra.client.requests.post")
+@patch("aiklyra.client.requests.post")
 def test_analyse_success(mock_post, setup_client):
     """
     Test successful analysis.
@@ -51,7 +51,7 @@ def test_analyse_success(mock_post, setup_client):
 
     # Ensure Authorization header is included in the request
     mock_post.assert_called_once_with(
-        f"{client.base_url}/{AethraClient.BASE_ANALYSE_ENDPOINT}",
+        f"{client.base_url}/{AiklyraClient.BASE_ANALYSE_ENDPOINT}",
         headers={
             "Authorization": f"Bearer {client.api_key}",
             "Content-Type": "application/json",
@@ -60,7 +60,7 @@ def test_analyse_success(mock_post, setup_client):
     )
 
 
-@patch("aethra.client.requests.post")
+@patch("aiklyra.client.requests.post")
 def test_analyse_invalid_api_key(mock_post, setup_client):
     """
     Test invalid API key error.
@@ -76,7 +76,7 @@ def test_analyse_invalid_api_key(mock_post, setup_client):
         client.analyse(conversation_data)
 
 
-@patch("aethra.client.requests.post")
+@patch("aiklyra.client.requests.post")
 def test_analyse_insufficient_credits(mock_post, setup_client):
     """
     Test insufficient credits error.
@@ -92,7 +92,7 @@ def test_analyse_insufficient_credits(mock_post, setup_client):
         client.analyse(conversation_data)
 
 
-@patch("aethra.client.requests.post")
+@patch("aiklyra.client.requests.post")
 def test_analyse_analysis_error(mock_post, setup_client):
     """
     Test analysis error with malformed response.
@@ -108,7 +108,7 @@ def test_analyse_analysis_error(mock_post, setup_client):
         client.analyse(conversation_data)
 
 
-@patch("aethra.client.requests.post")
+@patch("aiklyra.client.requests.post")
 def test_analyse_api_error(mock_post, setup_client):
     """
     Test generic API error.
@@ -120,13 +120,13 @@ def test_analyse_api_error(mock_post, setup_client):
     mock_response.text = "Internal Server Error"
     mock_post.return_value = mock_response
 
-    with pytest.raises(AethraAPIError) as exc_info:
+    with pytest.raises(AiklyraAPIError) as exc_info:
         client.analyse(conversation_data)
 
     assert "Error 500" in str(exc_info.value)
 
 
-@patch("aethra.client.requests.post")
+@patch("aiklyra.client.requests.post")
 def test_missing_authorization_header(mock_post, setup_client):
     """
     Test missing Authorization header.
@@ -142,7 +142,7 @@ def test_missing_authorization_header(mock_post, setup_client):
     }
     mock_post.return_value = mock_response
 
-    with pytest.raises(AethraAPIError) as exc_info:
+    with pytest.raises(AiklyraAPIError) as exc_info:
         client.analyse(conversation_data)
 
     assert "Error 422" in str(exc_info.value)

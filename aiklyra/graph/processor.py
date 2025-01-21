@@ -1,7 +1,7 @@
 import networkx as nx
 from typing import Callable, Dict, List, Optional
-from aethra.graph.filters.base_filter import BaseGraphFilter
-from aethra.models import ConversationFlowAnalysisResponse 
+from aiklyra.graph.filters.base_filter import BaseGraphFilter
+from aiklyra.models import ConversationFlowAnalysisResponse 
 from pyvis.network import Network
 import numpy as np 
 import os 

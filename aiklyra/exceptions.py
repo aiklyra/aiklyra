@@ -1,4 +1,4 @@
-class AethraAPIError(Exception):
+class AiklyraAPIError(Exception):
     """Base exception for ConvoLens API errors."""
 
     def __init__(self, message: str, status_code: int = None, details: dict = None):
@@ -24,21 +24,21 @@ class AethraAPIError(Exception):
         return base
 
 
-class InvalidAPIKeyError(AethraAPIError):
+class InvalidAPIKeyError(AiklyraAPIError):
     """Raised when the API key is invalid."""
 
     def __init__(self, message="Invalid API Key.", status_code=403, details=None):
         super().__init__(message, status_code, details)
 
 
-class InsufficientCreditsError(AethraAPIError):
+class InsufficientCreditsError(AiklyraAPIError):
     """Raised when the user has insufficient credits."""
 
     def __init__(self, message="Insufficient credits.", status_code=403, details=None):
         super().__init__(message, status_code, details)
 
 
-class AnalysisError(AethraAPIError):
+class AnalysisError(AiklyraAPIError):
     """Raised when analysis fails."""
 
     def __init__(self, message="Analysis failed.", status_code=500, details=None):

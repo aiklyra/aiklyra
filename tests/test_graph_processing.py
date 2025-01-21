@@ -1,7 +1,7 @@
 import pytest
 import networkx as nx
 import numpy as np
-from aethra import GraphProcessor, FRFilter, ThresholdFilter
+from aiklyra import GraphProcessor, FRFilter, ThresholdFilter
 
 
 @pytest.fixture

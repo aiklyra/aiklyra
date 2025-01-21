@@ -1,6 +1,6 @@
-from .client import AethraClient
+from .client import AiklyraClient
 from .exceptions import (
-    AethraAPIError,
+    AiklyraAPIError,
     InvalidAPIKeyError,
     InsufficientCreditsError,
     AnalysisError
