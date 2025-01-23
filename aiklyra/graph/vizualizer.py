@@ -1,7 +1,7 @@
 import networkx as nx
 import matplotlib.pyplot as plt
 from pyvis.network import Network
-from typing import Optional
+from typing import Optional , Tuple
 
 class GraphVisualizer:
     def __init__(self, graph: nx.DiGraph):
@@ -13,18 +13,31 @@ class GraphVisualizer:
         """
         self.graph = graph
 
-    def visualize(self, layout: str = 'spring', save_path: Optional[str] = None):
+    def visualize(
+        self, 
+        layout: str = 'spring', 
+        save_path: Optional[str] = None , 
+        figsize : Tuple[int] = (30, 40) , 
+        with_labels : bool = True , 
+        node_color : str = 'lightblue' ,
+        edge_color : str = 'gray' , 
+        edge_attribute : str = 'weight'):
         """
         Visualize the graph using a specified layout.
 
         Args:
             layout (str): The layout to use for visualization. Options: 'spring', 'circular', 'shell', 'random'.
             save_path (Optional[str]): Path to save the visualization as an image. If None, just show the plot.
+            figsize (Tuple[int]): The size of the figure (width, height) Defaults to (30 , 40).
+            with_labels (bool): Whether to display node labels.
+            node_color (str): The color of the nodes.
+            edge_color (str): The color of the edges.
+            edge_attribute (str): The edge attributes to display.
         """
         pos = self._get_layout(layout)
-        plt.figure(figsize=(10, 8))
-        nx.draw(self.graph, pos, with_labels=True, node_color='lightblue', edge_color='gray')
-        labels = nx.get_edge_attributes(self.graph, 'weight')
+        plt.figure(figsize=figsize)
+        nx.draw(self.graph, pos, with_labels=with_labels, node_color=node_color, edge_color=edge_color)
+        labels = nx.get_edge_attributes(self.graph, edge_attribute)
         nx.draw_networkx_edge_labels(self.graph, pos, edge_labels=labels)
         
         if save_path:
