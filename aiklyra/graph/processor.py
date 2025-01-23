@@ -2,6 +2,7 @@ import networkx as nx
 from typing import Callable, Dict, List, Optional
 from aiklyra.graph.filters.base_filter import BaseGraphFilter
 from aiklyra.models import ConversationFlowAnalysisResponse 
+from aiklyra.graph.visualizer import GraphVisualizer
 from pyvis.network import Network
 import numpy as np 
 import os 
@@ -76,4 +77,11 @@ class GraphProcessor:
 
         return intent_by_cluster, transition_matrix 
 
-   
+   def get_visualizer(self) -> GraphVisualizer:
+        """
+        Get a GraphVisualizer instance for the current graph.
+
+        Returns:
+            GraphVisualizer: A visualizer for the current graph.
+        """
+        return GraphVisualizer(self.graph)
