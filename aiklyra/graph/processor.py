@@ -77,7 +77,7 @@ class GraphProcessor:
 
         return intent_by_cluster, transition_matrix 
 
-   def get_visualizer(self) -> GraphVisualizer:
+    def get_visualizer(self) -> GraphVisualizer:
         """
         Get a GraphVisualizer instance for the current graph.
 
