@@ -63,7 +63,7 @@ def test_interactive_graph_visualizer_edge_color_normalization(sample_graph):
     """Test if the InteractiveGraphVisualizer correctly normalizes edge colors."""
 
     # Define the save path
-    save_path = os.path.join(os.getcwd(), "test_results", "graph", "interactive_graph_test.html")
+    save_path = os.path.join(os.getcwd(), "tests", "test_results", "graph", "interactive_graph_test.html")
 
     # Ensure the directory exists
     os.makedirs(os.path.dirname(save_path), exist_ok=True)
@@ -84,7 +84,7 @@ def test_static_graph_visualizer_layouts(sample_graph):
     layouts = ['spring', 'circular', 'shell', 'random']
     for layout in layouts:
         # Define the save path
-        save_path = os.path.join(os.getcwd(), "test_results", "graph", f"static_{layout}_graph_test.svg")
+        save_path = os.path.join(os.getcwd(),"tests" ,  "test_results", "graph", f"static_{layout}_graph_test.svg")
 
         # Ensure the directory exists
         os.makedirs(os.path.dirname(save_path), exist_ok=True)
