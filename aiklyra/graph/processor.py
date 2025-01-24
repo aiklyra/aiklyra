@@ -2,11 +2,20 @@ import networkx as nx
 from typing import Callable, Dict, List, Optional
 from aiklyra.graph.filters.base_filter import BaseGraphFilter
 from aiklyra.models import ConversationFlowAnalysisResponse 
-from aiklyra.graph.visualizer import GraphVisualizer
+from .graph_visualizers import (
+    BaseGraphVisualizer , 
+    InteractiveGraphVisualizer , 
+    StaticGraphVisualizer
+)
 from pyvis.network import Network
 import numpy as np 
 import os 
 class GraphProcessor:
+    graph_visualizer = {
+        'static_visualizer': StaticGraphVisualizer,
+        'interactive_visualizer': InteractiveGraphVisualizer
+    }
+    
     def __init__(self, analysis: ConversationFlowAnalysisResponse):
         """
         Initialize the GraphProcessor with the analysis response.
@@ -77,11 +86,17 @@ class GraphProcessor:
 
         return intent_by_cluster, transition_matrix 
 
-    def get_visualizer(self) -> GraphVisualizer:
+    def get_visualizer(self, visualizer: str) -> BaseGraphVisualizer:
         """
-        Get a GraphVisualizer instance for the current graph.
+        Get the specified graph visualizer.
+
+        Args:
+            visualizer (str): The visualizer to get. Options: 'static_visualizer', 'interactive_visualizer'.
 
         Returns:
-            GraphVisualizer: A visualizer for the current graph.
+            BaseGraphVisualizer: The visualizer instance.
         """
-        return GraphVisualizer(self.graph)
+        return self.graph_visualizer[visualizer]
+    def get_graph(self) -> nx.DiGraph:
+        """Get the graph."""
+        return self.graph
