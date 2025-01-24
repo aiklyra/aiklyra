@@ -5,7 +5,7 @@ from typing import Any , Tuple , Optional
 import networkx as nx
 from networkx import spring_layout , circular_layout , shell_layout , random_layout
 
-class PyvisGraphVisualizer(BaseGraphVisualizer):
+class StaticGraphVisualizer(BaseGraphVisualizer):
     layout = {
         'spring': spring_layout,
         'circular': circular_layout,
@@ -35,7 +35,7 @@ class PyvisGraphVisualizer(BaseGraphVisualizer):
             edge_color (str): The color of the edges.
             edge_attribute (str): The edge attributes to display.
         """
-        pos = PyvisGraphVisualizer.layout[layout](graph)
+        pos = StaticGraphVisualizer.layout[layout](graph)
         plt.figure(figsize=figsize)
         nx.draw(graph, pos, with_labels=with_labels, node_color=node_color, edge_color=edge_color)
         labels = nx.get_edge_attributes(graph, edge_attribute)
