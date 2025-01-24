@@ -9,7 +9,7 @@ class InteractiveGraphVisualizer(BaseGraphVisualizer):
     def visualize(
         graph : nx.DiGraph , 
         save_path: Optional[str] = None,
-        notebook: bool = False,
+        notebook: bool = True,
         width: str = "100%",
         height: str = "700px",
         directed: bool = True,
@@ -54,6 +54,9 @@ class InteractiveGraphVisualizer(BaseGraphVisualizer):
             directed=directed,
             cdn_resources="in_line"
         )
+        if not hasattr(net, "template") or net.template is None:
+            raise RuntimeError("PyVis failed to initialize its HTML template.")
+
 
         # Add nodes with default labels and titles
         for node in graph.nodes:
