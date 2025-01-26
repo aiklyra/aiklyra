@@ -1,7 +1,7 @@
 import pytest
 import networkx as nx
 import numpy as np
-from aiklyra import GraphProcessor, FRFilter, ThresholdFilter
+from aiklyra import GraphProcessor, FilterFR, FilterThreshold
 
 
 @pytest.fixture
@@ -31,12 +31,12 @@ def setup_data():
 
 def test_threshold_filter(setup_data):
     """
-    Test the ThresholdFilter to ensure it removes edges below the threshold.
+    Test the FilterThreshold to ensure it removes edges below the threshold.
     """
     graph, transition_matrix, intent_by_cluster = setup_data
 
     # Apply a threshold filter
-    threshold_filter = ThresholdFilter(threshold=0.3)
+    threshold_filter = FilterThreshold(threshold=0.3)
     filtered_graph = threshold_filter.apply(graph, transition_matrix, intent_by_cluster)
 
     # Check edges in the filtered graph
@@ -47,12 +47,12 @@ def test_threshold_filter(setup_data):
 
 def test_fr_filter(setup_data):
     """
-    Test the FRFilter for filtering, cycle removal, and subgraph reconnection.
+    Test the FilterFR for filtering, cycle removal, and subgraph reconnection.
     """
     graph, transition_matrix, intent_by_cluster = setup_data
 
-    # Apply the FRFilter
-    fr_filter = FRFilter(min_weight=0.3, top_k=2)
+    # Apply the FilterFR
+    fr_filter = FilterFR(min_weight=0.3, top_k=2)
     processed_graph = fr_filter.apply(graph, transition_matrix, intent_by_cluster)
 
     # Validate that cycles are removed
@@ -69,12 +69,12 @@ def test_combined_filters(setup_data):
     """
     graph, transition_matrix, intent_by_cluster = setup_data
 
-    # Step 1: Apply ThresholdFilter
-    threshold_filter = ThresholdFilter(threshold=0.3)
+    # Step 1: Apply FilterThreshold
+    threshold_filter = FilterThreshold(threshold=0.3)
     filtered_graph = threshold_filter.apply(graph, transition_matrix, intent_by_cluster)
 
-    # Step 2: Apply FRFilter
-    fr_filter = FRFilter(min_weight=0.3, top_k=2)
+    # Step 2: Apply FilterFR
+    fr_filter = FilterFR(min_weight=0.3, top_k=2)
     final_graph = fr_filter.apply(filtered_graph, transition_matrix, intent_by_cluster)
 
     # Validate that cycles are removed
@@ -97,16 +97,16 @@ def test_edge_case_empty_graph():
     transition_matrix = np.array([])
     intent_by_cluster = {}
 
-    # Apply ThresholdFilter
-    threshold_filter = ThresholdFilter(threshold=1)
+    # Apply FilterThreshold
+    threshold_filter = FilterThreshold(threshold=1)
     filtered_graph = threshold_filter.apply(empty_graph, transition_matrix, intent_by_cluster)
 
     # Validate the result is still an empty graph
     assert filtered_graph.number_of_nodes() == 0
     assert filtered_graph.number_of_edges() == 0
 
-    # Apply FRFilter
-    fr_filter = FRFilter(min_weight=1, top_k=2)
+    # Apply FilterFR
+    fr_filter = FilterFR(min_weight=1, top_k=2)
     processed_graph = fr_filter.apply(empty_graph, transition_matrix, intent_by_cluster)
 
     # Validate the result is still an empty graph
