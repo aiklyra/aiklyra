@@ -5,6 +5,24 @@ import networkx as nx
 
 
 class InteractiveGraphVisualizer(BaseGraphVisualizer):
+    """
+    A class for creating interactive graph visualizations using the PyVis library.
+
+    This class provides a method to visualize a directed graph (`nx.DiGraph`) interactively in a web-based interface.
+    The visualization is highly customizable, allowing users to configure node and edge styles, physics simulation
+    parameters, and more. The resulting visualization can be displayed in a Jupyter notebook or saved as an HTML file.
+
+    Attributes:
+        None
+
+    Methods:
+        visualize(graph, save_path, notebook, width, height, directed, node_font_size, edge_font_size, 
+                 arrow_scale_factor, physics_enabled, physics_solver, gravitational_constant, central_gravity, 
+                 spring_length, spring_constant, damping, avoid_overlap, max_velocity, min_velocity, timestep, 
+                 node_shape, node_border_width, node_color, edge_smooth_type, edge_color, arrow_to_enabled, 
+                 arrow_middle_enabled, arrow_from_enabled):
+            Creates an interactive graph visualization with customizable parameters.
+    """
     def visualize(
         graph: nx.DiGraph, 
         save_path: Optional[str] = None,
