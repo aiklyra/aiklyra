@@ -1,3 +1,4 @@
+
 class AiklyraAPIError(Exception):
     """Base exception for ConvoLens API errors."""
 
@@ -22,7 +23,12 @@ class AiklyraAPIError(Exception):
         if self.details:
             base += f" | Details: {self.details}"
         return base
-
+    
+class ValidationError(AiklyraAPIError):
+    """Raised when input validation fails."""
+    def __init__(self, message="Validation error.", status_code=400, details=None):
+        super().__init__(message, status_code, details)
+        
 
 class InvalidAPIKeyError(AiklyraAPIError):
     """Raised when the API key is invalid."""

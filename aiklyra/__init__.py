@@ -3,7 +3,9 @@ from .exceptions import (
     AiklyraAPIError,
     InvalidAPIKeyError,
     InsufficientCreditsError,
-    AnalysisError
+    AnalysisError,
+    ValidationError  
+
 )
 from .models import (
     ConversationFlowAnalysisRequest,
