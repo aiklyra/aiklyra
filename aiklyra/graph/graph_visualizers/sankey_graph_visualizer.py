@@ -18,7 +18,7 @@ class SankeyGraphVisualizer:
                 body {
                     margin: 0;
                     padding: 0;
-                    background-color: rgb(32, 35, 55);
+                    background-color: rgb(0, 12, 27); /* Updated background color */
                     font-family: Arial, sans-serif;
                     display: flex;
                     justify-content: center;
@@ -69,12 +69,12 @@ class SankeyGraphVisualizer:
 
                     gradient.append("stop")
                         .attr("offset", "0%")
-                        .attr("stop-color", "rgba(150, 85, 255, 1)")
+                        .attr("stop-color", "white") /* Edges start white */
                         .attr("stop-opacity", 1);
 
                     gradient.append("stop")
                         .attr("offset", "100%")
-                        .attr("stop-color", "rgba(103, 114, 229, 0.2)")
+                        .attr("stop-color", "white") /* Edges turn transparent */
                         .attr("stop-opacity", 0);
                 });
 
@@ -97,7 +97,7 @@ class SankeyGraphVisualizer:
                     .attr("y", d => d.y0)
                     .attr("height", d => d.y1 - d.y0)
                     .attr("width", sankey.nodeWidth())
-                    .style("fill", d => d.type === "client" ? "rgba(103, 114, 229, 1)" : "rgba(172, 85, 251, 1)");
+                    .style("fill", "white"); /* Nodes set to white */
 
                 svg.append("g")
                     .selectAll("text")
@@ -133,5 +133,16 @@ class SankeyGraphVisualizer:
             tmpfile_path = tmpfile.name
 
         webbrowser.open(f"file://{Path(tmpfile_path).resolve()}")
+if __name__ == '__main__':
+    import networkx as nx
+    
+    # Create a sample directed graph
+    G = nx.DiGraph()
+    G.add_edge("Client A", "Agent 1", value=10)
+    G.add_edge("Client B", "Agent 1", value=5)
+    G.add_edge("Client A", "Agent 2", value=15)
+    G.add_edge("Agent 1", "Final Destination", value=10)
+    G.add_edge("Agent 2", "Final Destination", value=15)
 
-
+    # Visualize the graph
+    SankeyGraphVisualizer.visualize(G)
