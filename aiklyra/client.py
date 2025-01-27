@@ -5,7 +5,8 @@ from .exceptions import (
     AiklyraAPIError,
     InvalidAPIKeyError,
     InsufficientCreditsError,
-    AnalysisError
+    AnalysisError,
+    ValidationError
 )
 
 
@@ -54,11 +55,12 @@ class AiklyraClient:
             AiklyraAPIError: For other API-related errors.
         """
         if not isinstance(conversation_data, dict):
-            raise ValueError("conversation_data must be a dictionary.")
+            raise ValidationError("conversation_data must be a dictionary.")
         if min_clusters <= 0 or max_clusters <= 0:
-            raise ValueError("min_clusters and max_clusters must be positive integers.")
+            raise ValidationError("min_clusters and max_clusters must be positive integers.")
         if min_clusters > max_clusters:
-            raise ValueError("Max clusters needs to be greater than Min Clusters")
+            raise ValidationError("Max clusters needs to be greater than Min Clusters")
+        
 
         if role != "Any":
             filtered_by_role = {}
