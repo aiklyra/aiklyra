@@ -4,8 +4,21 @@ import json
 
 
 class SankeyGraphVisualizer(BaseGraphVisualizer):
+    """
+    A class for visualizing directed graphs as interactive Sankey diagrams using D3.js.
+
+    This visualizer generates an HTML file that can be opened in a web browser to view
+    an interactive Sankey diagram representation of a directed graph.
+
+    Methods
+    -------
+    visualize(graph, output_file="sankey_diagram.html", **kwargs)
+        Generates and saves a Sankey diagram based on the input graph.
+
+    """
+
     def visualize(
-        graph : nx.DIGraph,
+        graph: nx.DiGraph,
         output_file="sankey_diagram.html",
         width=1000,
         height=700,
@@ -18,15 +31,75 @@ class SankeyGraphVisualizer(BaseGraphVisualizer):
         font_family="Arial, sans-serif",
         font_size="12px",
     ):
+        """
+        Generates an interactive Sankey diagram for a directed graph.
+
+        Parameters
+        ----------
+        graph : nx.DiGraph
+            The directed graph to be visualized. Nodes and edges in the graph
+            can have additional attributes, such as weights, which will influence
+            the size of the links in the diagram.
+
+        output_file : str, optional
+            The name of the output HTML file (default is "sankey_diagram.html").
+
+        width : int, optional
+            The width of the SVG canvas in pixels (default is 1000).
+
+        height : int, optional
+            The height of the SVG canvas in pixels (default is 700).
+
+        node_width : int, optional
+            The width of each node in the diagram (default is 20).
+
+        node_padding : int, optional
+            The vertical padding between nodes in the diagram (default is 20).
+
+        primary_color : str, optional
+            The primary color for the nodes (default is "rgba(103, 114, 229, 1)").
+
+        secondary_color : str, optional
+            The secondary color for the nodes (default is "rgba(172, 85, 251, 1)").
+
+        tertiary_color : str, optional
+            The tertiary color used for gradient effects on the links (default is "rgba(103, 114, 229, 0.2)").
+
+        background_color : str, optional
+            The background color of the diagram (default is "rgb(32, 35, 55)").
+
+        font_family : str, optional
+            The font family used for node labels (default is "Arial, sans-serif").
+
+        font_size : str, optional
+            The font size used for node labels (default is "12px").
+
+        Notes
+        -----
+        - The method creates an HTML file containing the diagram, which can be viewed in any modern browser.
+        - D3.js and d3-sankey libraries are loaded from external CDNs.
+        - Edge weights can be specified in the input graph to adjust the width of the links.
+
+        Examples
+        --------
+        >>> import networkx as nx
+        >>> from sankey_visualizer import SankeyGraphVisualizer
+        >>> graph = nx.DiGraph()
+        >>> graph.add_edge("A", "B", weight=3)
+        >>> graph.add_edge("B", "C", weight=2)
+        >>> visualizer = SankeyGraphVisualizer()
+        >>> visualizer.visualize(graph, output_file="example_sankey.html")
+        Sankey diagram saved to example_sankey.html. Open it in a browser to view the visualization.
+        """
         nodes = [{"name": str(node)} for node in graph.nodes()]
         node_indices = {node: i for i, node in enumerate(graph.nodes())}
         links = [
             {
                 "source": node_indices[edge[0]],
                 "target": node_indices[edge[1]],
-                "value": self.graph.edges[edge].get("weight", 1),
+                "value": graph.edges[edge].get("weight", 1),
             }
-            for edge in self.graph.edges()
+            for edge in graph.edges()
         ]
 
         # HTML and JS template for the Sankey diagram
