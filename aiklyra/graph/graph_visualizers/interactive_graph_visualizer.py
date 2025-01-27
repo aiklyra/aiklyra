@@ -2,12 +2,11 @@ from .base_graph_visualizer import BaseGraphVisualizer
 from pyvis.network import Network
 from typing import Optional
 import networkx as nx 
- 
 
 
 class InteractiveGraphVisualizer(BaseGraphVisualizer):
     def visualize(
-        graph : nx.DiGraph , 
+        graph: nx.DiGraph, 
         save_path: Optional[str] = None,
         notebook: bool = True,
         width: str = "100%",
@@ -23,13 +22,24 @@ class InteractiveGraphVisualizer(BaseGraphVisualizer):
         spring_length: int = 120,
         spring_constant: float = 0.04,
         damping: float = 0.57,
-        avoid_overlap: float = 0.92
+        avoid_overlap: float = 0.92,
+        max_velocity: int = 50,
+        min_velocity: int = 1,
+        timestep: float = 0.5,
+        node_shape: str = "dot",
+        node_border_width: int = 1,
+        node_color: Optional[str] = None,
+        edge_smooth_type: str = "dynamic",
+        edge_color: Optional[str] = None,
+        arrow_to_enabled: bool = True,
+        arrow_middle_enabled: bool = False,
+        arrow_from_enabled: bool = False
     ):
         """
         Create an interactive graph visualization using PyVis with parameterized options.
 
         Args:
-            graph (nx.DiGraph) : graph to be visualized 
+            graph (nx.DiGraph): Graph to be visualized.
             save_path (Optional[str]): Path to save the HTML visualization. If None, display the graph in the browser.
             notebook (bool): Whether to render the visualization in a Jupyter notebook. Default is False.
             width (str): Width of the visualization. Default is "100%".
@@ -46,6 +56,17 @@ class InteractiveGraphVisualizer(BaseGraphVisualizer):
             spring_constant (float): Spring constant for the physics simulation. Default is 0.04.
             damping (float): Damping for the physics simulation. Default is 0.57.
             avoid_overlap (float): Avoid overlap for the physics simulation. Default is 0.92.
+            max_velocity (int): Maximum velocity for the physics simulation. Default is 50.
+            min_velocity (int): Minimum velocity for the physics simulation. Default is 1.
+            timestep (float): Time step for the physics simulation. Default is 0.5.
+            node_shape (str): Shape of nodes (e.g., "dot", "ellipse"). Default is "dot".
+            node_border_width (int): Border width for nodes. Default is 1.
+            node_color (Optional[str]): Default color for nodes. Default is None.
+            edge_smooth_type (str): Type of edge smoothing (e.g., "dynamic", "continuous"). Default is "dynamic".
+            edge_color (Optional[str]): Default color for edges. Default is None.
+            arrow_to_enabled (bool): Whether to enable arrow pointing to the target node. Default is True.
+            arrow_middle_enabled (bool): Whether to enable arrow in the middle of the edge. Default is False.
+            arrow_from_enabled (bool): Whether to enable arrow pointing from the source node. Default is False.
         """
         net = Network(
             notebook=notebook,
@@ -57,10 +78,16 @@ class InteractiveGraphVisualizer(BaseGraphVisualizer):
         if not hasattr(net, "template") or net.template is None:
             raise RuntimeError("PyVis failed to initialize its HTML template.")
 
-
-        # Add nodes with default labels and titles
+        # Add nodes with parameters
         for node in graph.nodes:
-            net.add_node(node, label=str(node), title=str(node))
+            net.add_node(
+                node, 
+                label=str(node), 
+                title=str(node), 
+                shape=node_shape, 
+                borderWidth=node_border_width,
+                color=node_color
+            )
 
         # Calculate edge weights for normalization
         min_weight = float('inf')
@@ -73,12 +100,18 @@ class InteractiveGraphVisualizer(BaseGraphVisualizer):
         # Normalize weights and assign edge colors
         def get_edge_color(weight: float) -> str:
             normalized_weight = (weight - min_weight) / (max_weight - min_weight) if max_weight > min_weight else 0
-            return f'rgb({int(255 * normalized_weight)}, 0, {int(255 * (1 - normalized_weight))})'
+            return edge_color or f'rgb({int(255 * normalized_weight)}, 0, {int(255 * (1 - normalized_weight))})'
 
         for u, v, data in graph.edges(data=True):
             weight = data.get('weight', 1)
             color = get_edge_color(weight)
-            net.add_edge(u, v, value=weight, title=f'Weight: {weight:.2f}', color=color)
+            net.add_edge(
+                u, 
+                v, 
+                value=weight, 
+                title=f'Weight: {weight:.2f}', 
+                color=color
+            )
 
         # Set visualization options dynamically
         net.set_options(f"""
@@ -86,13 +119,21 @@ class InteractiveGraphVisualizer(BaseGraphVisualizer):
             "nodes": {{
                 "font": {{
                     "size": {node_font_size}
-                }}
+                }},
+                "shape": "{node_shape}",
+                "borderWidth": {node_border_width}
             }},
             "edges": {{
                 "arrows": {{
                     "to": {{
-                        "enabled": true,
+                        "enabled": {str(arrow_to_enabled).lower()},
                         "scaleFactor": {arrow_scale_factor}
+                    }},
+                    "middle": {{
+                        "enabled": {str(arrow_middle_enabled).lower()}
+                    }},
+                    "from": {{
+                        "enabled": {str(arrow_from_enabled).lower()}
                     }}
                 }},
                 "font": {{
@@ -101,14 +142,13 @@ class InteractiveGraphVisualizer(BaseGraphVisualizer):
                 }},
                 "smooth": {{
                     "enabled": true,
-                    "type": "dynamic"
+                    "type": "{edge_smooth_type}"
                 }}
             }},
             "physics": {{
                 "enabled": {str(physics_enabled).lower()},
                 "solver": "{physics_solver}",
                 "{physics_solver}": {{
-                    "theta": 0.5,
                     "gravitationalConstant": {gravitational_constant},
                     "centralGravity": {central_gravity},
                     "springLength": {spring_length},
@@ -116,9 +156,9 @@ class InteractiveGraphVisualizer(BaseGraphVisualizer):
                     "damping": {damping},
                     "avoidOverlap": {avoid_overlap}
                 }},
-                "maxVelocity": 41,
-                "minVelocity": 1,
-                "timestep": 0.5
+                "maxVelocity": {max_velocity},
+                "minVelocity": {min_velocity},
+                "timestep": {timestep}
             }}
         }}
         """)
@@ -128,4 +168,3 @@ class InteractiveGraphVisualizer(BaseGraphVisualizer):
             net.show(save_path)
         else:
             net.show("graph.html")
-    
