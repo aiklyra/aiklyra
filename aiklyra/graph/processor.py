@@ -5,7 +5,8 @@ from aiklyra.models import ConversationFlowAnalysisResponse
 from .graph_visualizers import (
     BaseGraphVisualizer , 
     InteractiveGraphVisualizer , 
-    StaticGraphVisualizer
+    StaticGraphVisualizer , 
+    SankeyGraphVisualizer
 )
 from pyvis.network import Network
 import numpy as np 
@@ -13,7 +14,8 @@ import os
 class GraphProcessor:
     graph_visualizer = {
         'static_visualizer': StaticGraphVisualizer,
-        'interactive_visualizer': InteractiveGraphVisualizer
+        'interactive_visualizer': InteractiveGraphVisualizer,
+        'sankey_visualizer': SankeyGraphVisualizer
     }
     
     def __init__(self, analysis: ConversationFlowAnalysisResponse):
