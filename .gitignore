@@ -172,3 +172,7 @@ cython_debug/
 test_env
 package_test
 tutorials
+
+# test results for plotting 
+*.svg 
+*.html
