@@ -3,7 +3,7 @@ import json
 from unittest.mock import patch, MagicMock
 import numpy as np
 from difflib import SequenceMatcher
-from aiklyra import AiklyraClient, GraphProcessor, FRFilter
+from aiklyra import AiklyraClient, GraphProcessor, FilterFR
 
 
 @pytest.fixture
@@ -109,7 +109,7 @@ def test_overall_library_with_tolerance(mock_post, mock_conversation_data, mock_
     graph_processor = GraphProcessor(analysis)
 
     # Apply filters to the graph
-    filter_and_reconnect = FRFilter(min_weight=0.1, top_k=1)
+    filter_and_reconnect = FilterFR(min_weight=0.1, top_k=1)
     graph_processor.filter_graph(filter_strategy=filter_and_reconnect)
 
     # Verify that the graph is processed without errors
