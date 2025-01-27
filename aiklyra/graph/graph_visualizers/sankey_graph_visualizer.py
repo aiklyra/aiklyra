@@ -125,14 +125,14 @@ class SankeyGraphVisualizer:
         """
 
     @staticmethod
-    def visualize(graph: nx.DiGraph, save_path: Optional[str] = None) -> str:
+    def visualize(graph: nx.DiGraph, save_path: Optional[str] = None , render : bool = False ) -> str:
         """
         Visualizes a directed graph as a Sankey diagram and returns the HTML content.
 
         Args:
             graph (nx.DiGraph): The directed graph to visualize.
             save_path (Optional[str]): The path to save the HTML content. If None, a temporary file is used.
-
+            render (bool): Whether to render the visualization in the browser. Default is False.
         Returns:
             str: The HTML content of the Sankey diagram.
         """
@@ -153,12 +153,14 @@ class SankeyGraphVisualizer:
             Path(save_path).parent.mkdir(parents=True, exist_ok=True)
             with open(save_path, "w") as file:
                 file.write(html_content)
-            webbrowser.open(f"file://{Path(save_path).resolve()}")
+            if render :
+                webbrowser.open(f"file://{Path(save_path).resolve()}")
         else:
             with tempfile.NamedTemporaryFile("w", delete=False, suffix=".html") as tmpfile:
                 tmpfile.write(html_content)
                 tmpfile_path = tmpfile.name
-            webbrowser.open(f"file://{Path(tmpfile_path).resolve()}")
+            if render :
+                webbrowser.open(f"file://{Path(tmpfile_path).resolve()}")
 
         return html_content
 
