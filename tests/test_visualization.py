@@ -3,6 +3,7 @@ import networkx as nx
 from aiklyra.graph.graph_visualizers import InteractiveGraphVisualizer, StaticGraphVisualizer, SankeyGraphVisualizer
 import os
 
+
 @pytest.fixture
 def sample_graph():
     """Fixture for creating a sample directed graph with weights."""
@@ -15,6 +16,7 @@ def sample_graph():
     graph.add_edge(3, 1, weight=2.0)
     return graph
 
+
 @pytest.fixture
 def simple_graph():
     """Fixture for a simple graph with no edge weights."""
@@ -22,33 +24,44 @@ def simple_graph():
     graph.add_edges_from([(1, 2), (2, 3), (3, 4)])
     return graph
 
-def test_interactive_graph_visualizer_render(sample_graph, tmpdir):
-    """Test if the InteractiveGraphVisualizer renders without errors."""
-    save_path = tmpdir.join("interactive_graph.html")
 
-    # Render graph and save to a temporary directory
-    InteractiveGraphVisualizer.visualize(graph=sample_graph, save_path=str(save_path))
+def test_interactive_graph_visualizer_render(sample_graph):
+    """Test if the InteractiveGraphVisualizer renders without errors."""
+    save_path = os.path.join(
+        os.getcwd(), "tests", "test_results", "graph", "interactive", "interactive_graph.html"
+    )
+
+    # Ensure the directory exists
+    os.makedirs(os.path.dirname(save_path), exist_ok=True)
+
+    # Render graph and save to the specified directory
+    InteractiveGraphVisualizer.visualize(graph=sample_graph, save_path=save_path)
 
     # Ensure the file was created
-    assert save_path.check(file=True)
+    assert os.path.exists(save_path)
+
 
 def test_interactive_graph_visualizer_no_save(sample_graph):
     """Test if the InteractiveGraphVisualizer renders to an inline browser."""
-
-    # This test checks for no exceptions when rendering without save_path
     try:
         InteractiveGraphVisualizer.visualize(graph=sample_graph)
     except Exception as e:
         pytest.fail(f"InteractiveGraphVisualizer failed with exception: {e}")
 
-def test_static_graph_visualizer_render(sample_graph, tmpdir):
-    """Test if the StaticGraphVisualizer renders and saves the graph."""
-    save_path = tmpdir.join("static_graph.png")
 
-    # Render graph and save to a temporary directory
+def test_static_graph_visualizer_render(sample_graph):
+    """Test if the StaticGraphVisualizer renders and saves the graph."""
+    save_path = os.path.join(
+        os.getcwd(), "tests", "test_results", "graph", "static", "static_graph.png"
+    )
+
+    # Ensure the directory exists
+    os.makedirs(os.path.dirname(save_path), exist_ok=True)
+
+    # Render graph and save to the specified directory
     StaticGraphVisualizer.visualize(
         graph=sample_graph,
-        save_path=str(save_path),
+        save_path=save_path,
         layout='spring',
         figsize=(10, 10),
         with_labels=True,
@@ -57,21 +70,22 @@ def test_static_graph_visualizer_render(sample_graph, tmpdir):
     )
 
     # Ensure the file was created
-    assert save_path.check(file=True)
+    assert os.path.exists(save_path)
+
 
 def test_static_graph_visualizer_no_save(sample_graph):
     """Test if the StaticGraphVisualizer renders to the screen without saving."""
-
     try:
         StaticGraphVisualizer.visualize(graph=sample_graph)
     except Exception as e:
         pytest.fail(f"StaticGraphVisualizer failed with exception: {e}")
 
+
 def test_interactive_graph_visualizer_edge_color_normalization(sample_graph):
     """Test if the InteractiveGraphVisualizer correctly normalizes edge colors."""
-
-    # Define the save path
-    save_path = os.path.join(os.getcwd(), "tests", "test_results", "graph", "interactive_graph_test.html")
+    save_path = os.path.join(
+        os.getcwd(), "tests", "test_results", "graph", "interactive", "interactive_graph_test.html"
+    )
 
     # Ensure the directory exists
     os.makedirs(os.path.dirname(save_path), exist_ok=True)
@@ -88,11 +102,11 @@ def test_interactive_graph_visualizer_edge_color_normalization(sample_graph):
 
 def test_static_graph_visualizer_layouts(sample_graph):
     """Test if the StaticGraphVisualizer works with different layouts."""
-
     layouts = ['spring', 'circular', 'shell', 'random']
     for layout in layouts:
-        # Define the save path
-        save_path = os.path.join(os.getcwd(), "tests", "test_results", "graph", f"static_{layout}_graph_test.svg")
+        save_path = os.path.join(
+            os.getcwd(), "tests", "test_results", "graph", "static", f"static_{layout}_graph_test.svg"
+        )
 
         # Ensure the directory exists
         os.makedirs(os.path.dirname(save_path), exist_ok=True)
@@ -107,43 +121,61 @@ def test_static_graph_visualizer_layouts(sample_graph):
         except Exception as e:
             pytest.fail(f"StaticGraphVisualizer failed with layout '{layout}': {e}")
 
+
 # --- Tests for SankeyGraphVisualizer ---
 
-def test_sankey_graph_visualizer_render(sample_graph, tmpdir):
+def test_sankey_graph_visualizer_render(sample_graph):
     """Test if the SankeyGraphVisualizer renders without errors."""
-    save_path = tmpdir.join("sankey_graph.html")
+    save_path = os.path.join(
+        os.getcwd(), "tests", "test_results", "graph", "sankey", "sankey_graph.html"
+    )
+
+    # Ensure the directory exists
+    os.makedirs(os.path.dirname(save_path), exist_ok=True)
 
     try:
-        # Render graph and save to a temporary directory
-        SankeyGraphVisualizer.visualize(graph=sample_graph, output_file=str(save_path))
+        # Render graph and save to the specified directory
+        SankeyGraphVisualizer.visualize(graph=sample_graph, output_file=save_path)
     except Exception as e:
         pytest.fail(f"SankeyGraphVisualizer failed with exception: {e}")
 
     # Ensure the file was created
-    assert save_path.check(file=True)
+    assert os.path.exists(save_path)
 
-def test_sankey_graph_visualizer_no_weights(simple_graph, tmpdir):
+
+def test_sankey_graph_visualizer_no_weights(simple_graph):
     """Test if the SankeyGraphVisualizer works with a graph that has no weights."""
-    save_path = tmpdir.join("sankey_no_weights.html")
+    save_path = os.path.join(
+        os.getcwd(), "tests", "test_results", "graph", "sankey", "sankey_no_weights.html"
+    )
+
+    # Ensure the directory exists
+    os.makedirs(os.path.dirname(save_path), exist_ok=True)
 
     try:
-        # Render graph and save to a temporary directory
-        SankeyGraphVisualizer.visualize(graph=simple_graph, output_file=str(save_path))
+        # Render graph and save to the specified directory
+        SankeyGraphVisualizer.visualize(graph=simple_graph, output_file=save_path)
     except Exception as e:
         pytest.fail(f"SankeyGraphVisualizer failed with exception: {e}")
 
     # Ensure the file was created
-    assert save_path.check(file=True)
+    assert os.path.exists(save_path)
 
-def test_sankey_graph_visualizer_custom_colors(sample_graph, tmpdir):
+
+def test_sankey_graph_visualizer_custom_colors(sample_graph):
     """Test if the SankeyGraphVisualizer renders with custom colors."""
-    save_path = tmpdir.join("sankey_custom_colors.html")
+    save_path = os.path.join(
+        os.getcwd(), "tests", "test_results", "graph", "sankey", "sankey_custom_colors.html"
+    )
+
+    # Ensure the directory exists
+    os.makedirs(os.path.dirname(save_path), exist_ok=True)
 
     try:
-        # Render graph and save to a temporary directory
+        # Render graph and save to the specified directory
         SankeyGraphVisualizer.visualize(
             graph=sample_graph,
-            output_file=str(save_path),
+            output_file=save_path,
             primary_color="red",
             secondary_color="blue",
             tertiary_color="green",
@@ -153,21 +185,27 @@ def test_sankey_graph_visualizer_custom_colors(sample_graph, tmpdir):
         pytest.fail(f"SankeyGraphVisualizer failed with custom colors: {e}")
 
     # Ensure the file was created
-    assert save_path.check(file=True)
+    assert os.path.exists(save_path)
 
-def test_sankey_graph_visualizer_large_graph(tmpdir):
+
+def test_sankey_graph_visualizer_large_graph():
     """Test if the SankeyGraphVisualizer handles a large graph."""
     graph = nx.DiGraph()
     for i in range(100):
         graph.add_edge(i, i + 1, weight=i * 0.1)
 
-    save_path = tmpdir.join("sankey_large_graph.html")
+    save_path = os.path.join(
+        os.getcwd(), "tests", "test_results", "graph", "sankey", "sankey_large_graph.html"
+    )
+
+    # Ensure the directory exists
+    os.makedirs(os.path.dirname(save_path), exist_ok=True)
 
     try:
-        # Render graph and save to a temporary directory
-        SankeyGraphVisualizer.visualize(graph=graph, output_file=str(save_path))
+        # Render graph and save to the specified directory
+        SankeyGraphVisualizer.visualize(graph=graph, output_file=save_path)
     except Exception as e:
         pytest.fail(f"SankeyGraphVisualizer failed with a large graph: {e}")
 
     # Ensure the file was created
-    assert save_path.check(file=True)
+    assert os.path.exists(save_path)
