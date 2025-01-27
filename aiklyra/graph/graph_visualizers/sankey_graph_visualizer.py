@@ -1,193 +1,137 @@
-from .base_graph_visualizer import BaseGraphVisualizer
-import networkx as nx
 import json
+import networkx as nx
+import tempfile
+import webbrowser
+from pathlib import Path
 
+class SankeyGraphVisualizer:
+    template = """
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Sankey Diagram</title>
+            <script src="https://d3js.org/d3.v7.min.js"></script>
+            <script src="https://cdn.jsdelivr.net/npm/d3-sankey@0.12.3/dist/d3-sankey.min.js"></script>
+            <style>
+                body {
+                    margin: 0;
+                    padding: 0;
+                    background-color: rgb(32, 35, 55);
+                    font-family: Arial, sans-serif;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    height: 100vh;
+                }
 
-class SankeyGraphVisualizer(BaseGraphVisualizer):
-    """
-    A class for visualizing directed graphs as interactive Sankey diagrams using D3.js.
+                .node text {
+                    fill: white; 
+                    font-size: 12px;
+                }
 
-    This visualizer generates an HTML file that can be opened in a web browser to view
-    an interactive Sankey diagram representation of a directed graph.
+                .link {
+                    fill: none;
+                }
+            </style>
+        </head>
+        <body>
+            <script>
+                const data = {data};
 
-    Methods
-    -------
-    visualize(graph, output_file="sankey_diagram.html", **kwargs)
-        Generates and saves a Sankey diagram based on the input graph.
+                const width = 1000;
+                const height = 700;
 
-    """
+                const svg = d3.select("body").append("svg")
+                    .attr("width", width)
+                    .attr("height", height);
 
-    def visualize(
-        graph: nx.DiGraph,
-        output_file="sankey_diagram.html",
-        width=1000,
-        height=700,
-        node_width=20,
-        node_padding=20,
-        primary_color="rgba(103, 114, 229, 1)",
-        secondary_color="rgba(172, 85, 251, 1)",
-        tertiary_color="rgba(103, 114, 229, 0.2)",
-        background_color="rgb(32, 35, 55)",
-        font_family="Arial, sans-serif",
-        font_size="12px",
-    ):
-        """
-        Generates an interactive Sankey diagram for a directed graph.
+                const sankey = d3.sankey()
+                    .nodeWidth(20)
+                    .nodePadding(20)
+                    .extent([[50, 50], [width - 50, height - 50]]);
 
-        Parameters
-        ----------
-        graph : nx.DiGraph
-            The directed graph to be visualized. Nodes and edges in the graph
-            can have additional attributes, such as weights, which will influence
-            the size of the links in the diagram.
+                const graph = sankey({
+                    nodes: data.nodes.map(d => Object.assign({}, d)),
+                    links: data.links.map(d => Object.assign({}, d))
+                });
 
-        output_file : str, optional
-            The name of the output HTML file (default is "sankey_diagram.html").
+                const defs = svg.append("defs");
+                graph.links.forEach((link, i) => {
+                    const gradient = defs.append("linearGradient")
+                        .attr("id", `gradient${i}`)
+                        .attr("gradientUnits", "userSpaceOnUse")
+                        .attr("x1", link.source.x1)
+                        .attr("y1", (link.source.y0 + link.source.y1) / 2)
+                        .attr("x2", link.target.x0)
+                        .attr("y2", (link.target.y0 + link.target.y1) / 2);
 
-        width : int, optional
-            The width of the SVG canvas in pixels (default is 1000).
+                    gradient.append("stop")
+                        .attr("offset", "0%")
+                        .attr("stop-color", "rgba(150, 85, 255, 1)")
+                        .attr("stop-opacity", 1);
 
-        height : int, optional
-            The height of the SVG canvas in pixels (default is 700).
+                    gradient.append("stop")
+                        .attr("offset", "100%")
+                        .attr("stop-color", "rgba(103, 114, 229, 0.2)")
+                        .attr("stop-opacity", 0);
+                });
 
-        node_width : int, optional
-            The width of each node in the diagram (default is 20).
+                svg.append("g")
+                    .selectAll("path")
+                    .data(graph.links)
+                    .enter()
+                    .append("path")
+                    .attr("class", "link")
+                    .attr("d", d3.sankeyLinkHorizontal())
+                    .style("stroke", (d, i) => `url(#gradient${i})`)
+                    .style("stroke-width", d => Math.max(1, d.width));
 
-        node_padding : int, optional
-            The vertical padding between nodes in the diagram (default is 20).
+                svg.append("g")
+                    .selectAll("rect")
+                    .data(graph.nodes)
+                    .enter()
+                    .append("rect")
+                    .attr("x", d => d.x0)
+                    .attr("y", d => d.y0)
+                    .attr("height", d => d.y1 - d.y0)
+                    .attr("width", sankey.nodeWidth())
+                    .style("fill", d => d.type === "client" ? "rgba(103, 114, 229, 1)" : "rgba(172, 85, 251, 1)");
 
-        primary_color : str, optional
-            The primary color for the nodes (default is "rgba(103, 114, 229, 1)").
-
-        secondary_color : str, optional
-            The secondary color for the nodes (default is "rgba(172, 85, 251, 1)").
-
-        tertiary_color : str, optional
-            The tertiary color used for gradient effects on the links (default is "rgba(103, 114, 229, 0.2)").
-
-        background_color : str, optional
-            The background color of the diagram (default is "rgb(32, 35, 55)").
-
-        font_family : str, optional
-            The font family used for node labels (default is "Arial, sans-serif").
-
-        font_size : str, optional
-            The font size used for node labels (default is "12px").
-
-        Notes
-        -----
-        - The method creates an HTML file containing the diagram, which can be viewed in any modern browser.
-        - D3.js and d3-sankey libraries are loaded from external CDNs.
-        - Edge weights can be specified in the input graph to adjust the width of the links.
-
-        Examples
-        --------
-        >>> import networkx as nx
-        >>> from sankey_visualizer import SankeyGraphVisualizer
-        >>> graph = nx.DiGraph()
-        >>> graph.add_edge("A", "B", weight=3)
-        >>> graph.add_edge("B", "C", weight=2)
-        >>> visualizer = SankeyGraphVisualizer()
-        >>> visualizer.visualize(graph, output_file="example_sankey.html")
-        Sankey diagram saved to example_sankey.html. Open it in a browser to view the visualization.
-        """
-        nodes = [{"name": str(node)} for node in graph.nodes()]
-        node_indices = {node: i for i, node in enumerate(graph.nodes())}
-        links = [
-            {
-                "source": node_indices[edge[0]],
-                "target": node_indices[edge[1]],
-                "value": graph.edges[edge].get("weight", 1),
-            }
-            for edge in graph.edges()
-        ]
-
-        # HTML and JS template for the Sankey diagram
-        html_template = html_template = f"""
-            <!DOCTYPE html>
-            <html lang="en">
-            <head>
-                <meta charset="UTF-8">
-                <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                <title>Sankey Diagram</title>
-                <script src="https://d3js.org/d3.v7.min.js"></script>
-                <script src="https://cdn.jsdelivr.net/npm/d3-sankey@0.12.3/dist/d3-sankey.min.js"></script>
-                <style>
-                    body {{
-                        margin: 0;
-                        padding: 0;
-                        background-color: {background_color};
-                        font-family: {font_family};
-                        display: flex;
-                        justify-content: center;
-                        align-items: center;
-                        height: 100vh;
-                    }}
-
-                    .node text {{
-                        fill: white; 
-                        font-size: {font_size};
-                    }}
-
-                    .link {{
-                        fill: none;
-                    }}
-                </style>
-            </head>
-            <body>
-                <script>
-                    const data = {json.dumps({"nodes": nodes, "links": links}, indent=4)};
-
-                    const width = {width};
-                    const height = {height};
-
-                    const svg = d3.select("body").append("svg")
-                        .attr("width", width)
-                        .attr("height", height);
-
-                    const sankey = d3.sankey()
-                        .nodeWidth({node_width})
-                        .nodePadding({node_padding})
-                        .extent([[50, 50], [width - 50, height - 50]]);
-
-                    const graph = sankey(data);
-
-                    svg.append("g")
-                        .selectAll("path")
-                        .data(graph.links)
-                        .enter()
-                        .append("path")
-                        .attr("class", "link")
-                        .attr("d", d3.sankeyLinkHorizontal())
-                        .style("stroke-width", d => Math.max(1, d.width));
-
-                    svg.append("g")
-                        .selectAll("rect")
-                        .data(graph.nodes)
-                        .enter()
-                        .append("rect")
-                        .attr("x", d => d.x0)
-                        .attr("y", d => d.y0)
-                        .attr("height", d => d.y1 - d.y0)
-                        .attr("width", sankey.nodeWidth())
-                        .style("fill", "{primary_color}");
-
-                    svg.append("g")
-                        .selectAll("text")
-                        .data(graph.nodes)
-                        .enter()
-                        .append("text")
-                        .attr("x", d => d.x0)
-                        .attr("y", d => d.y0)
-                        .text(d => d.name);
-                </script>
-            </body>
-            </html>
+                svg.append("g")
+                    .selectAll("text")
+                    .data(graph.nodes)
+                    .enter()
+                    .append("text")
+                    .attr("x", d => (d.x0 + d.x1) / 2)
+                    .attr("y", d => d.y0 - 5)
+                    .attr("dy", "0")
+                    .attr("text-anchor", "middle")
+                    .text(d => d.name)
+                    .style("fill", "white");
+            </script>
+        </body>
+        </html>
         """
 
+    def visualize(graph: nx.DiGraph):
+        nodes = [{"name": str(node), "type": "client" if "client" in str(node).lower() else "agent"}
+                 for node in graph.nodes()]
+        node_index = {node: i for i, node in enumerate(graph.nodes())}
+        links = [{"source": node_index[u], "target": node_index[v], "value": data.get("value", 1)}
+                 for u, v, data in graph.edges(data=True)]
 
-        # Write the HTML to the specified file
-        with open(output_file, "w") as f:
-            f.write(html_template)
+        sankey_data = {
+            "nodes": nodes,
+            "links": links
+        }
+        html_content = SankeyGraphVisualizer.template.replace("{data}", json.dumps(sankey_data))
 
-        print(f"Sankey diagram saved to {output_file}. Open it in a browser to view the visualization.")
+        with tempfile.NamedTemporaryFile("w", delete=False, suffix=".html") as tmpfile:
+            tmpfile.write(html_content)
+            tmpfile_path = tmpfile.name
+
+        webbrowser.open(f"file://{Path(tmpfile_path).resolve()}")
+
+
