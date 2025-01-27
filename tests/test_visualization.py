@@ -1,7 +1,8 @@
 import pytest
 import networkx as nx
-from aiklyra.graph.graph_visualizers import InteractiveGraphVisualizer, StaticGraphVisualizer
-import os 
+from aiklyra.graph.graph_visualizers import InteractiveGraphVisualizer, StaticGraphVisualizer, SankeyGraphVisualizer
+import os
+
 @pytest.fixture
 def sample_graph():
     """Fixture for creating a sample directed graph with weights."""
@@ -12,6 +13,13 @@ def sample_graph():
     graph.add_edge(1, 2, weight=0.5)
     graph.add_edge(2, 3, weight=1.5)
     graph.add_edge(3, 1, weight=2.0)
+    return graph
+
+@pytest.fixture
+def simple_graph():
+    """Fixture for a simple graph with no edge weights."""
+    graph = nx.DiGraph()
+    graph.add_edges_from([(1, 2), (2, 3), (3, 4)])
     return graph
 
 def test_interactive_graph_visualizer_render(sample_graph, tmpdir):
@@ -84,7 +92,7 @@ def test_static_graph_visualizer_layouts(sample_graph):
     layouts = ['spring', 'circular', 'shell', 'random']
     for layout in layouts:
         # Define the save path
-        save_path = os.path.join(os.getcwd(),"tests" ,  "test_results", "graph", f"static_{layout}_graph_test.svg")
+        save_path = os.path.join(os.getcwd(), "tests", "test_results", "graph", f"static_{layout}_graph_test.svg")
 
         # Ensure the directory exists
         os.makedirs(os.path.dirname(save_path), exist_ok=True)
@@ -98,3 +106,68 @@ def test_static_graph_visualizer_layouts(sample_graph):
             )
         except Exception as e:
             pytest.fail(f"StaticGraphVisualizer failed with layout '{layout}': {e}")
+
+# --- Tests for SankeyGraphVisualizer ---
+
+def test_sankey_graph_visualizer_render(sample_graph, tmpdir):
+    """Test if the SankeyGraphVisualizer renders without errors."""
+    save_path = tmpdir.join("sankey_graph.html")
+
+    try:
+        # Render graph and save to a temporary directory
+        SankeyGraphVisualizer.visualize(graph=sample_graph, output_file=str(save_path))
+    except Exception as e:
+        pytest.fail(f"SankeyGraphVisualizer failed with exception: {e}")
+
+    # Ensure the file was created
+    assert save_path.check(file=True)
+
+def test_sankey_graph_visualizer_no_weights(simple_graph, tmpdir):
+    """Test if the SankeyGraphVisualizer works with a graph that has no weights."""
+    save_path = tmpdir.join("sankey_no_weights.html")
+
+    try:
+        # Render graph and save to a temporary directory
+        SankeyGraphVisualizer.visualize(graph=simple_graph, output_file=str(save_path))
+    except Exception as e:
+        pytest.fail(f"SankeyGraphVisualizer failed with exception: {e}")
+
+    # Ensure the file was created
+    assert save_path.check(file=True)
+
+def test_sankey_graph_visualizer_custom_colors(sample_graph, tmpdir):
+    """Test if the SankeyGraphVisualizer renders with custom colors."""
+    save_path = tmpdir.join("sankey_custom_colors.html")
+
+    try:
+        # Render graph and save to a temporary directory
+        SankeyGraphVisualizer.visualize(
+            graph=sample_graph,
+            output_file=str(save_path),
+            primary_color="red",
+            secondary_color="blue",
+            tertiary_color="green",
+            background_color="black"
+        )
+    except Exception as e:
+        pytest.fail(f"SankeyGraphVisualizer failed with custom colors: {e}")
+
+    # Ensure the file was created
+    assert save_path.check(file=True)
+
+def test_sankey_graph_visualizer_large_graph(tmpdir):
+    """Test if the SankeyGraphVisualizer handles a large graph."""
+    graph = nx.DiGraph()
+    for i in range(100):
+        graph.add_edge(i, i + 1, weight=i * 0.1)
+
+    save_path = tmpdir.join("sankey_large_graph.html")
+
+    try:
+        # Render graph and save to a temporary directory
+        SankeyGraphVisualizer.visualize(graph=graph, output_file=str(save_path))
+    except Exception as e:
+        pytest.fail(f"SankeyGraphVisualizer failed with a large graph: {e}")
+
+    # Ensure the file was created
+    assert save_path.check(file=True)
