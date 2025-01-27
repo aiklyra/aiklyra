@@ -11,6 +11,24 @@ from .exceptions import (
 
 
 class AiklyraClient:
+    """
+    A client for interacting with the Aiklyra API to analyze conversation flows.
+
+    This class provides methods to send conversation data to the Aiklyra API for analysis. It handles
+    authentication, request formatting, and response parsing. The client supports customizable parameters
+    for clustering and filtering conversation data by role.
+
+    Attributes:
+        BASE_ANALYSE_ENDPOINT (str): The endpoint for the base conversation flow analysis.
+        api_key (str): The API key used for authentication.
+        base_url (str): The base URL of the Aiklyra API.
+        headers (Dict[str, str]): The headers for API requests, including the authorization token.
+
+    Methods:
+        __init__(api_key, base_url): Initializes the Aiklyra client with an API key and base URL.
+        analyse(conversation_data, min_clusters, max_clusters, top_k_nearest_to_centroid, role):
+            Sends conversation data to the Aiklyra API for analysis and returns the results.
+    """
     BASE_ANALYSE_ENDPOINT = "conversation-flow-analysis/base_analyse-conversation-flow"
 
     def __init__(self, api_key: str, base_url: str = "http://localhost:8002"):
