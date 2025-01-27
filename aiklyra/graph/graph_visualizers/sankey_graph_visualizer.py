@@ -3,14 +3,23 @@ import networkx as nx
 import json
 
 
-
 class SankeyGraphVisualizer(BaseGraphVisualizer):
-    def __init__(self, graph):
-        super().__init__(graph)
-
-    def visualize(self, output_file="sankey_diagram.html"):
-        nodes = [{"name": str(node)} for node in self.graph.nodes()]
-        node_indices = {node: i for i, node in enumerate(self.graph.nodes())}
+    def visualize(
+        graph : nx.DIGraph,
+        output_file="sankey_diagram.html",
+        width=1000,
+        height=700,
+        node_width=20,
+        node_padding=20,
+        primary_color="rgba(103, 114, 229, 1)",
+        secondary_color="rgba(172, 85, 251, 1)",
+        tertiary_color="rgba(103, 114, 229, 0.2)",
+        background_color="rgb(32, 35, 55)",
+        font_family="Arial, sans-serif",
+        font_size="12px",
+    ):
+        nodes = [{"name": str(node)} for node in graph.nodes()]
+        node_indices = {node: i for i, node in enumerate(graph.nodes())}
         links = [
             {
                 "source": node_indices[edge[0]],
@@ -34,8 +43,8 @@ class SankeyGraphVisualizer(BaseGraphVisualizer):
                 body {{
                     margin: 0;
                     padding: 0;
-                    background-color: rgb(32, 35, 55);
-                    font-family: Arial, sans-serif;
+                    background-color: {background_color};
+                    font-family: {font_family};
                     display: flex;
                     justify-content: center;
                     align-items: center;
@@ -44,7 +53,7 @@ class SankeyGraphVisualizer(BaseGraphVisualizer):
 
                 .node text {{
                     fill: white; 
-                    font-size: 12px;
+                    font-size: {font_size};
                 }}
 
                 .link {{
@@ -56,16 +65,16 @@ class SankeyGraphVisualizer(BaseGraphVisualizer):
             <script>
                 const data = {json.dumps({"nodes": nodes, "links": links})};
 
-                const width = 1000;
-                const height = 700;
+                const width = {width};
+                const height = {height};
 
                 const svg = d3.select("body").append("svg")
                     .attr("width", width)
                     .attr("height", height);
 
                 const sankey = d3.sankey()
-                    .nodeWidth(20)
-                    .nodePadding(20)
+                    .nodeWidth({node_width})
+                    .nodePadding({node_padding})
                     .extent([[50, 50], [width - 50, height - 50]]);
 
                 const graph = sankey({
@@ -85,12 +94,12 @@ class SankeyGraphVisualizer(BaseGraphVisualizer):
 
                     gradient.append("stop")
                         .attr("offset", "0%")
-                        .attr("stop-color", "rgba(150, 85, 255, 1)") 
+                        .attr("stop-color", "{primary_color}")
                         .attr("stop-opacity", 1);
 
                     gradient.append("stop")
                         .attr("offset", "100%")
-                        .attr("stop-color", "rgba(103, 114, 229, 0.2)")
+                        .attr("stop-color", "{tertiary_color}")
                         .attr("stop-opacity", 0);
                 }});
 
@@ -113,7 +122,7 @@ class SankeyGraphVisualizer(BaseGraphVisualizer):
                     .attr("y", d => d.y0)
                     .attr("height", d => d.y1 - d.y0)
                     .attr("width", sankey.nodeWidth())
-                    .style("fill", (d, i) => i % 2 === 0 ? "rgba(103, 114, 229, 1)" : "rgba(172, 85, 251, 1)");
+                    .style("fill", (d, i) => i % 2 === 0 ? "{primary_color}" : "{secondary_color}");
 
                 svg.append("g")
                     .selectAll("text")
