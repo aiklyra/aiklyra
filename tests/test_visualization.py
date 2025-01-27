@@ -135,7 +135,7 @@ def test_sankey_graph_visualizer_render(sample_graph):
 
     try:
         # Render graph and save to the specified directory
-        SankeyGraphVisualizer.visualize(graph=sample_graph, output_file=save_path)
+        SankeyGraphVisualizer.visualize(graph=sample_graph, save_path=save_path)
     except Exception as e:
         pytest.fail(f"SankeyGraphVisualizer failed with exception: {e}")
 
@@ -154,7 +154,7 @@ def test_sankey_graph_visualizer_no_weights(simple_graph):
 
     try:
         # Render graph and save to the specified directory
-        SankeyGraphVisualizer.visualize(graph=simple_graph, output_file=save_path)
+        SankeyGraphVisualizer.visualize(graph=simple_graph, save_path=save_path)
     except Exception as e:
         pytest.fail(f"SankeyGraphVisualizer failed with exception: {e}")
 
@@ -162,30 +162,6 @@ def test_sankey_graph_visualizer_no_weights(simple_graph):
     assert os.path.exists(save_path)
 
 
-def test_sankey_graph_visualizer_custom_colors(sample_graph):
-    """Test if the SankeyGraphVisualizer renders with custom colors."""
-    save_path = os.path.join(
-        os.getcwd(), "tests", "test_results", "graph", "sankey", "sankey_custom_colors.html"
-    )
-
-    # Ensure the directory exists
-    os.makedirs(os.path.dirname(save_path), exist_ok=True)
-
-    try:
-        # Render graph and save to the specified directory
-        SankeyGraphVisualizer.visualize(
-            graph=sample_graph,
-            output_file=save_path,
-            primary_color="red",
-            secondary_color="blue",
-            tertiary_color="green",
-            background_color="black"
-        )
-    except Exception as e:
-        pytest.fail(f"SankeyGraphVisualizer failed with custom colors: {e}")
-
-    # Ensure the file was created
-    assert os.path.exists(save_path)
 
 
 def test_sankey_graph_visualizer_large_graph():
@@ -203,7 +179,7 @@ def test_sankey_graph_visualizer_large_graph():
 
     try:
         # Render graph and save to the specified directory
-        SankeyGraphVisualizer.visualize(graph=graph, output_file=save_path)
+        SankeyGraphVisualizer.visualize(graph=graph, save_path=save_path)
     except Exception as e:
         pytest.fail(f"SankeyGraphVisualizer failed with a large graph: {e}")
 

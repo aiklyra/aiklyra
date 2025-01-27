@@ -3,8 +3,16 @@ import networkx as nx
 import tempfile
 import webbrowser
 from pathlib import Path
+from typing import Optional, Dict, List, Any
 
 class SankeyGraphVisualizer:
+    """
+    A class to visualize a directed graph as a Sankey diagram using D3.js.
+
+    Attributes:
+        template (str): HTML template for the Sankey diagram visualization.
+    """
+
     template = """
         <!DOCTYPE html>
         <html lang="en">
@@ -69,12 +77,12 @@ class SankeyGraphVisualizer:
 
                     gradient.append("stop")
                         .attr("offset", "0%")
-                        .attr("stop-color", "white") /* Edges start white */
+                        .attr("stop-color", "rgba(196, 253, 235,0.9)") /* Edges start white */
                         .attr("stop-opacity", 1);
 
                     gradient.append("stop")
                         .attr("offset", "100%")
-                        .attr("stop-color", "white") /* Edges turn transparent */
+                        .attr("stop-color", "rgba(196, 253, 235,0.9)") /* Edges turn transparent */
                         .attr("stop-opacity", 0);
                 });
 
@@ -97,52 +105,94 @@ class SankeyGraphVisualizer:
                     .attr("y", d => d.y0)
                     .attr("height", d => d.y1 - d.y0)
                     .attr("width", sankey.nodeWidth())
-                    .style("fill", "white"); /* Nodes set to white */
+                    .style("fill", "rgba(196, 253, 235 ,0.8)"); /* Nodes set to white */
 
                 svg.append("g")
                     .selectAll("text")
                     .data(graph.nodes)
                     .enter()
                     .append("text")
-                    .attr("x", d => (d.x0 + d.x1) / 2)
-                    .attr("y", d => d.y0 - 5)
-                    .attr("dy", "0")
-                    .attr("text-anchor", "middle")
+                    .attr("x", d => d.x0 + 10) // Position text 10px to the left of the node's left edge
+                    .attr("y", d => (d.y0 + d.y1) / 2 ) // Center text vertically relative to the node
+                    .attr("text-anchor", "end") // Align text to the "end" (right side before rotation)
+                    .attr("dominant-baseline", "middle") // Center text vertically
+                    .attr("transform", d => `rotate(-90, ${d.x0 - 10}, ${(d.y0 + d.y1) / 2})`) // Rotate text -90 degrees around (x, y)
                     .text(d => d.name)
-                    .style("fill", "white");
+                    .style("fill", "rgb(233, 233, 233)");
             </script>
         </body>
         </html>
         """
 
-    def visualize(graph: nx.DiGraph):
-        nodes = [{"name": str(node), "type": "client" if "client" in str(node).lower() else "agent"}
-                 for node in graph.nodes()]
-        node_index = {node: i for i, node in enumerate(graph.nodes())}
-        links = [{"source": node_index[u], "target": node_index[v], "value": data.get("value", 1)}
-                 for u, v, data in graph.edges(data=True)]
+    @staticmethod
+    def visualize(graph: nx.DiGraph, save_path: Optional[str] = None) -> str:
+        """
+        Visualizes a directed graph as a Sankey diagram and returns the HTML content.
 
-        sankey_data = {
+        Args:
+            graph (nx.DiGraph): The directed graph to visualize.
+            save_path (Optional[str]): The path to save the HTML content. If None, a temporary file is used.
+
+        Returns:
+            str: The HTML content of the Sankey diagram.
+        """
+        nodes: List[Dict[str, Any]] = [{"name": str(node), "type": "client" if "client" in str(node).lower() else "agent"}
+                                       for node in graph.nodes()]
+        node_index: Dict[Any, int] = {node: i for i, node in enumerate(graph.nodes())}
+        links: List[Dict[str, Any]] = [{"source": node_index[u], "target": node_index[v], "value": data.get("value", 1)}
+                                       for u, v, data in graph.edges(data=True)]
+
+        sankey_data: Dict[str, List[Dict[str, Any]]] = {
             "nodes": nodes,
             "links": links
         }
-        html_content = SankeyGraphVisualizer.template.replace("{data}", json.dumps(sankey_data))
+        html_content: str = SankeyGraphVisualizer.template.replace("{data}", json.dumps(sankey_data))
 
-        with tempfile.NamedTemporaryFile("w", delete=False, suffix=".html") as tmpfile:
-            tmpfile.write(html_content)
-            tmpfile_path = tmpfile.name
+        if save_path:
+            # Create the directory if it doesn't exist
+            Path(save_path).parent.mkdir(parents=True, exist_ok=True)
+            with open(save_path, "w") as file:
+                file.write(html_content)
+            webbrowser.open(f"file://{Path(save_path).resolve()}")
+        else:
+            with tempfile.NamedTemporaryFile("w", delete=False, suffix=".html") as tmpfile:
+                tmpfile.write(html_content)
+                tmpfile_path = tmpfile.name
+            webbrowser.open(f"file://{Path(tmpfile_path).resolve()}")
 
-        webbrowser.open(f"file://{Path(tmpfile_path).resolve()}")
+        return html_content
+
 if __name__ == '__main__':
     import networkx as nx
-    
-    # Create a sample directed graph
-    G = nx.DiGraph()
-    G.add_edge("Client A", "Agent 1", value=10)
-    G.add_edge("Client B", "Agent 1", value=5)
-    G.add_edge("Client A", "Agent 2", value=15)
-    G.add_edge("Agent 1", "Final Destination", value=10)
-    G.add_edge("Agent 2", "Final Destination", value=15)
 
+    # Create a directed graph
+    G = nx.DiGraph()
+
+    # Add nodes
+    G.add_node("Agent Greets the Client")  # Start with a polite greeting
+    G.add_node("Agent Identifies Issue")  # Ask diagnostic questions to understand the problem
+    G.add_node("Agent Correctly Uses Tool")  # Attempt to use a tool for stock extraction
+    G.add_node("Error & Client Upset")  # Error during database access and client becomes mad
+    G.add_node("Agent Answers FAQ Questions")  # Client asks FAQs, agent responds correctly
+    G.add_node("Agent Wrongly Uses Tool")  # Agent uses the database tool incorrectly
+    G.add_node("End of Interaction")  # End interaction politely and with gratitude
+
+    # Add edges with probabilities
+    G.add_edge("Agent Greets the Client", "Agent Identifies Issue", value=50)  # Proceed to identifying issue
+    G.add_edge("Agent Greets the Client", "Agent Answers FAQ Questions", value=30)  # Client directly asks FAQs
+    G.add_edge("Agent Greets the Client", "Agent Wrongly Uses Tool", value=20)  # Agent misuses database tool early
+
+    G.add_edge("Agent Identifies Issue", "Agent Correctly Uses Tool", value=50)  # Correct use of database tool
+    G.add_edge("Agent Identifies Issue", "Agent Wrongly Uses Tool", value=30)  # Misuse of database tool
+    G.add_edge("Agent Identifies Issue", "Agent Answers FAQ Questions", value=20)  # Client has FAQs instead
+
+    G.add_edge("Agent Correctly Uses Tool", "End of Interaction", value=40)  # Successful issue resolution
+
+    G.add_edge("Agent Wrongly Uses Tool", "Agent Correctly Uses Tool", value=50)  # Correct mistake, try again
+    G.add_edge("Agent Wrongly Uses Tool", "Error & Client Upset", value=30)  # Repeated issues, client upset
+
+    G.add_edge("Agent Answers FAQ Questions", "End of Interaction", value=50)  # End happily after FAQ resolution
+
+    G.add_edge("Error & Client Upset", "End of Interaction", value=90)  # Apologize and end politely
     # Visualize the graph
-    SankeyGraphVisualizer.visualize(G)
+    SankeyGraphVisualizer.visualize(G, save_path="output/sankey_diagram.html")
