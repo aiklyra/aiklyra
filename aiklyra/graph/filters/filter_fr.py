@@ -4,7 +4,7 @@ import numpy as np
 from typing import Dict
 
 
-class FRFilter(BaseGraphFilter):
+class FilterFR(BaseGraphFilter):
     """
     A filter that performs edge filtering based on weight, removes cycles, 
     and reconnects disconnected subgraphs using the transition matrix.
@@ -16,7 +16,7 @@ class FRFilter(BaseGraphFilter):
 
     def __init__(self, min_weight: float = 0.0, top_k: int = 5):
         """
-        Initialize the FRFilter.
+        Initialize the FilterFR.
 
         Args:
             min_weight (float): Minimum weight threshold for keeping edges. Defaults to 0.0.
@@ -88,7 +88,7 @@ class FRFilter(BaseGraphFilter):
                                             [0.0, 0.0, 0.8],
                                             [0.0, 0.0, 0.0]])
             >>> intent_by_cluster = {"0": "Intent A", "1": "Intent B", "2": "Intent C"}
-            >>> filter = FRFilter(min_weight=0.3, top_k=1)
+            >>> filter = FilterFR(min_weight=0.3, top_k=1)
             >>> processed_graph = filter.apply(graph, transition_matrix, intent_by_cluster)
             >>> list(processed_graph.edges(data=True))
             [('Intent A', 'Intent B', {'weight': 0.5}),

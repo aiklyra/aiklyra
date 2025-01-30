@@ -3,7 +3,7 @@ import networkx as nx
 import numpy as np
 from typing import Dict
 
-class TopKFilter(BaseGraphFilter):
+class FilterTopK(BaseGraphFilter):
     """
     A filter that retains only the top K outgoing edges for each node in a directed graph,
     based on edge weights.
@@ -14,7 +14,7 @@ class TopKFilter(BaseGraphFilter):
 
     def __init__(self, top_k: int):
         """
-        Initialize the TopKFilter.
+        Initialize the FilterTopK.
 
         Args:
             top_k (int): The number of top outgoing edges to retain for each node.
@@ -53,7 +53,7 @@ class TopKFilter(BaseGraphFilter):
             >>> graph.add_edge(0, 2, weight=0.2)
             >>> graph.add_edge(0, 3, weight=0.8)
             >>> graph.add_edge(1, 2, weight=0.3)
-            >>> filter = TopKFilter(top_k=2)
+            >>> filter = FilterTopK(top_k=2)
             >>> filtered_graph = filter.apply(graph, None, None)
             >>> list(filtered_graph.edges(data=True))
             [(0, 3, {'weight': 0.8}), (0, 1, {'weight': 0.5}), (1, 2, {'weight': 0.3})]

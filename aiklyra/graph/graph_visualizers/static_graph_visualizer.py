@@ -6,6 +6,21 @@ import networkx as nx
 from networkx import spring_layout , circular_layout , shell_layout , random_layout
 
 class StaticGraphVisualizer(BaseGraphVisualizer):
+    """
+    A class for visualizing directed graphs using various layout algorithms.
+
+    This class provides a method to visualize a directed graph (`DiGraph`) using different layout algorithms
+    such as spring, circular, shell, and random layouts. The visualization can be customized with options
+    for node colors, edge colors, edge labels, and more. The resulting plot can be displayed or saved to a file.
+
+    Attributes:
+        layout (dict): A dictionary mapping layout names to their corresponding layout functions from NetworkX.
+                       Supported layouts include 'spring', 'circular', 'shell', and 'random'.
+
+    Methods:
+        visualize(graph, layout, save_path, figsize, with_labels, node_color, edge_color, edge_attribute):
+            Visualizes the given graph using the specified layout and customization options.
+    """
     layout = {
         'spring': spring_layout,
         'circular': circular_layout,

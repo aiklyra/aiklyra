@@ -8,6 +8,7 @@ from aiklyra.client import (
     AiklyraAPIError,
     ConversationFlowAnalysisRequest,
     ConversationFlowAnalysisResponse,
+    ValidationError,  
 )
 
 
@@ -146,3 +147,54 @@ def test_missing_authorization_header(mock_post, setup_client):
         client.analyse(conversation_data)
 
     assert "Error 422" in str(exc_info.value)
+@patch("aiklyra.client.requests.post")
+def test_analyse_invalid_conversation_data_type(mock_post, setup_client):
+    """Test ValidationError when conversation_data is not a dictionary."""
+    client, _ = setup_client
+    invalid_conversation_data = ["not a dictionary"]
+    
+    with pytest.raises(ValidationError) as exc_info:
+        client.analyse(conversation_data=invalid_conversation_data)
+    
+    assert "conversation_data must be a dictionary." in str(exc_info.value)
+    mock_post.assert_not_called()
+
+
+@patch("aiklyra.client.requests.post")
+def test_analyse_invalid_min_clusters(mock_post, setup_client):
+    """Test ValidationError when min_clusters is non-positive."""
+    client, valid_data = setup_client
+    
+    with pytest.raises(ValidationError) as exc_info:
+        client.analyse(conversation_data=valid_data, min_clusters=0)
+    
+    assert "min_clusters and max_clusters must be positive integers." in str(exc_info.value)
+    mock_post.assert_not_called()
+
+
+@patch("aiklyra.client.requests.post")
+def test_analyse_invalid_max_clusters(mock_post, setup_client):
+    """Test ValidationError when max_clusters is non-positive."""
+    client, valid_data = setup_client
+    
+    with pytest.raises(ValidationError) as exc_info:
+        client.analyse(conversation_data=valid_data, max_clusters=-5)
+    
+    assert "min_clusters and max_clusters must be positive integers." in str(exc_info.value)
+    mock_post.assert_not_called()
+
+
+@patch("aiklyra.client.requests.post")
+def test_analyse_min_clusters_greater_than_max(mock_post, setup_client):
+    """Test ValidationError when min_clusters exceeds max_clusters."""
+    client, valid_data = setup_client
+    
+    with pytest.raises(ValidationError) as exc_info:
+        client.analyse(
+            conversation_data=valid_data,
+            min_clusters=10,
+            max_clusters=5
+        )
+    
+    assert "Max clusters needs to be greater than Min Clusters" in str(exc_info.value)
+    mock_post.assert_not_called()

@@ -3,7 +3,7 @@ import networkx as nx
 import numpy as np
 from typing import Dict
 
-class ThresholdFilter(BaseGraphFilter):
+class FilterThreshold(BaseGraphFilter):
     """
     A filter that removes edges from a graph whose weights are below a specified threshold.
 
@@ -13,7 +13,7 @@ class ThresholdFilter(BaseGraphFilter):
 
     def __init__(self, threshold: float):
         """
-        Initialize the ThresholdFilter.
+        Initialize the FilterThreshold.
 
         Args:
             threshold (float): The minimum weight threshold for edges (0 < threshold <= 1). 
@@ -63,13 +63,13 @@ class ThresholdFilter(BaseGraphFilter):
             >>> graph.add_edge("Node A", "Node B", weight=0.5)
             >>> graph.add_edge("Node A", "Node C", weight=0.2)
             >>> graph.add_edge("Node B", "Node C", weight=0.8)
-            >>> threshold_filter = ThresholdFilter(threshold=0.3)
+            >>> threshold_filter = FilterThreshold(threshold=0.3)
             >>> filtered_graph = threshold_filter.apply(graph, None, None)
             >>> list(filtered_graph.edges(data=True))
             [('Node A', 'Node B', {'weight': 0.5}), ('Node B', 'Node C', {'weight': 0.8})]
 
         Notes:
-            - The threshold value is determined when the `ThresholdFilter` object is initialized.
+            - The threshold value is determined when the `FilterThreshold` object is initialized.
             - If no edges meet the threshold criteria, the resulting graph may contain nodes but no edges.
             - The method assumes that all edges in the graph have a 'weight' attribute. If the attribute
               is missing, an exception may be raised.
