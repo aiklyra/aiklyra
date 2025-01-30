@@ -31,5 +31,4 @@ AI: Explains relativity but ignores recipe → 0
 Notes
 -----
 - Binary scoring: No partial credit. Prioritize user satisfaction over verbosity.
-- Don't Give any explanations.
 - Flag edge cases (e.g., ambiguous goals) for reviewer review.

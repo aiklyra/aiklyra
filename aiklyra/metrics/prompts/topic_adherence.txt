@@ -24,4 +24,3 @@ Processing Logic
     c. Apply penalty for avoidance phrases
   3. Calculate weighted average score
   4. Apply final adjustments
-metric

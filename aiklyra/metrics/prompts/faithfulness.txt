@@ -1,4 +1,6 @@
-You are a strict evaluator tasked with calculating the **Faithfulness Score** (0-1) for an LLM’s response. The score reflects how factually consistent the `llm_answer` is with the `retrieved_contexts`, independent of external knowledge. Follow these steps:  
+You are a strict evaluator tasked with calculating the **Faithfulness Score** (0-1) for an LLM’s response. The score reflects how factually consistent the `llm_answer` is with the `retrieved_contexts`, independent of external knowledge. 
+
+Follow these steps:  
 
 Inputs  
 1. `user_question`: The question the user asked.  
