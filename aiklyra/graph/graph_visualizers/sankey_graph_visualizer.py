@@ -83,7 +83,7 @@ class SankeyGraphVisualizer:
                     gradient.append("stop")
                         .attr("offset", "100%")
                         .attr("stop-color", "rgba(196, 253, 235,0.9)") /* Edges turn transparent */
-                        .attr("stop-opacity", 0);
+                        .attr("stop-opacity", 0.3);
                 });
 
                 svg.append("g")
@@ -112,13 +112,15 @@ class SankeyGraphVisualizer:
                     .data(graph.nodes)
                     .enter()
                     .append("text")
-                    .attr("x", d => d.x0 + 10) // Position text 10px to the left of the node's left edge
-                    .attr("y", d => (d.y0 + d.y1) / 2 ) // Center text vertically relative to the node
-                    .attr("text-anchor", "end") // Align text to the "end" (right side before rotation)
-                    .attr("dominant-baseline", "middle") // Center text vertically
-                    .attr("transform", d => `rotate(-90, ${d.x0 - 10}, ${(d.y0 + d.y1) / 2})`) // Rotate text -90 degrees around (x, y)
+                    .attr("x", d => (d.x0 + d.x1) / 2 + 20) 
+                    .attr("y", d => d.y0 - 8) 
+                    .attr("dy", "0") 
+                    .attr("text-anchor", "middle") 
                     .text(d => d.name)
-                    .style("fill", "rgb(233, 233, 233)");
+                    .style("fill", "rgba(255, 253, 235,0.9)") /* Text color set to white */
+                    .style("font-size", "17px")
+                    .style("font-family", "Courier New")
+                    .style("font-weight", "bold"); 
             </script>
         </body>
         </html>
@@ -165,36 +167,43 @@ class SankeyGraphVisualizer:
         return html_content
 
 if __name__ == '__main__':
-    import networkx as nx
+    nodes = [
+    "Customer Inquiry",         # "Hello" - Initial customer message
+    "Agent Uses Tool",          # "Automated Acknowledgment" -> Changed
+    "Clarification Request",    # "Response2" - Customer seeking clarification
+    "Agent Response",           # "Response3" - Human agent responds
+    "Customer Provides Info",   # "Response4" - Customer shares details
+    "Solution Provided",        # "Response5" - Agent suggests a solution
+    "Escalation to Supervisor", # "Response7" - Issue is escalated
+    "Final Resolution",         # "Response8" - Issue resolved
+    "End"        # "Exit" - Conversation ends
+    ]
+
+
+
+    links = [
+    (0, 1, 10),  # Customer Inquiry -> Agent Uses Tool
+    (0, 2, 20),  # Customer Inquiry -> Clarification Request
+    (1, 5, 5),   # Agent Uses Tool -> Solution Provided
+    (2, 3, 8),   # Clarification Request -> Agent Response
+    (2, 4, 12),  # Clarification Request -> Customer Provides Info
+    (3, 6, 4),   # Agent Response -> Escalation to Supervisor
+    (3, 7, 6),   # Agent Response -> Final Resolution
+    (4, 8, 3),   # Customer Provides Info -> End of Interaction
+    (5, 8, 10),  # Solution Provided -> End of Interaction (New)
+    (6, 8, 10),  # Escalation to Supervisor -> End of Interaction (New)
+    (7, 8, 10)   # Final Resolution -> End of Interaction (New)
+    ]
 
     # Create a directed graph
     G = nx.DiGraph()
+    index_to_name = {i: name for i, name in enumerate(nodes)}
+    # Add nodes with labels
+    for i, name in enumerate(nodes):
+        G.add_node(name)
 
-    # Add nodes
-    G.add_node("Agent Greets the Client")  # Start with a polite greeting
-    G.add_node("Agent Identifies Issue")  # Ask diagnostic questions to understand the problem
-    G.add_node("Agent Correctly Uses Tool")  # Attempt to use a tool for stock extraction
-    G.add_node("Error & Client Upset")  # Error during database access and client becomes mad
-    G.add_node("Agent Answers FAQ Questions")  # Client asks FAQs, agent responds correctly
-    G.add_node("Agent Wrongly Uses Tool")  # Agent uses the database tool incorrectly
-    G.add_node("End of Interaction")  # End interaction politely and with gratitude
+    # Add edges with weights
+    for src, tgt, weight in links:
+        G.add_edge(index_to_name[src], index_to_name[tgt], weight=weight)
 
-    # Add edges with probabilities
-    G.add_edge("Agent Greets the Client", "Agent Identifies Issue", value=50)  # Proceed to identifying issue
-    G.add_edge("Agent Greets the Client", "Agent Answers FAQ Questions", value=30)  # Client directly asks FAQs
-    G.add_edge("Agent Greets the Client", "Agent Wrongly Uses Tool", value=20)  # Agent misuses database tool early
-
-    G.add_edge("Agent Identifies Issue", "Agent Correctly Uses Tool", value=50)  # Correct use of database tool
-    G.add_edge("Agent Identifies Issue", "Agent Wrongly Uses Tool", value=30)  # Misuse of database tool
-    G.add_edge("Agent Identifies Issue", "Agent Answers FAQ Questions", value=20)  # Client has FAQs instead
-
-    G.add_edge("Agent Correctly Uses Tool", "End of Interaction", value=40)  # Successful issue resolution
-
-    G.add_edge("Agent Wrongly Uses Tool", "Agent Correctly Uses Tool", value=50)  # Correct mistake, try again
-    G.add_edge("Agent Wrongly Uses Tool", "Error & Client Upset", value=30)  # Repeated issues, client upset
-
-    G.add_edge("Agent Answers FAQ Questions", "End of Interaction", value=50)  # End happily after FAQ resolution
-
-    G.add_edge("Error & Client Upset", "End of Interaction", value=90)  # Apologize and end politely
-    # Visualize the graph
     SankeyGraphVisualizer.visualize(G, save_path="output/sankey_diagram.html")
