@@ -84,6 +84,7 @@ class SankeyGraphVisualizer:
                         .attr("offset", "100%")
                         .attr("stop-color", "rgba(196, 253, 235,0.9)") /* Edges turn transparent */
                         .attr("stop-opacity", 0.3);
+                        .attr("stop-opacity", 0.3);
                 });
 
                 svg.append("g")
@@ -116,7 +117,15 @@ class SankeyGraphVisualizer:
                     .attr("y", d => d.y0 - 8) 
                     .attr("dy", "0") 
                     .attr("text-anchor", "middle") 
+                    .attr("x", d => (d.x0 + d.x1) / 2 + 20) 
+                    .attr("y", d => d.y0 - 8) 
+                    .attr("dy", "0") 
+                    .attr("text-anchor", "middle") 
                     .text(d => d.name)
+                    .style("fill", "rgba(255, 253, 235,0.9)") /* Text color set to white */
+                    .style("font-size", "17px")
+                    .style("font-family", "Courier New")
+                    .style("font-weight", "bold"); 
                     .style("fill", "rgba(255, 253, 235,0.9)") /* Text color set to white */
                     .style("font-size", "17px")
                     .style("font-family", "Courier New")
@@ -194,9 +203,45 @@ if __name__ == '__main__':
     (6, 8, 10),  # Escalation to Supervisor -> End of Interaction (New)
     (7, 8, 10)   # Final Resolution -> End of Interaction (New)
     ]
+    nodes = [
+    "Customer Inquiry",         # "Hello" - Initial customer message
+    "Agent Uses Tool",          # "Automated Acknowledgment" -> Changed
+    "Clarification Request",    # "Response2" - Customer seeking clarification
+    "Agent Response",           # "Response3" - Human agent responds
+    "Customer Provides Info",   # "Response4" - Customer shares details
+    "Solution Provided",        # "Response5" - Agent suggests a solution
+    "Escalation to Supervisor", # "Response7" - Issue is escalated
+    "Final Resolution",         # "Response8" - Issue resolved
+    "End"        # "Exit" - Conversation ends
+    ]
+
+
+
+    links = [
+    (0, 1, 10),  # Customer Inquiry -> Agent Uses Tool
+    (0, 2, 20),  # Customer Inquiry -> Clarification Request
+    (1, 5, 5),   # Agent Uses Tool -> Solution Provided
+    (2, 3, 8),   # Clarification Request -> Agent Response
+    (2, 4, 12),  # Clarification Request -> Customer Provides Info
+    (3, 6, 4),   # Agent Response -> Escalation to Supervisor
+    (3, 7, 6),   # Agent Response -> Final Resolution
+    (4, 8, 3),   # Customer Provides Info -> End of Interaction
+    (5, 8, 10),  # Solution Provided -> End of Interaction (New)
+    (6, 8, 10),  # Escalation to Supervisor -> End of Interaction (New)
+    (7, 8, 10)   # Final Resolution -> End of Interaction (New)
+    ]
 
     # Create a directed graph
     G = nx.DiGraph()
+    index_to_name = {i: name for i, name in enumerate(nodes)}
+    # Add nodes with labels
+    for i, name in enumerate(nodes):
+        G.add_node(name)
+
+    # Add edges with weights
+    for src, tgt, weight in links:
+        G.add_edge(index_to_name[src], index_to_name[tgt], weight=weight)
+
     index_to_name = {i: name for i, name in enumerate(nodes)}
     # Add nodes with labels
     for i, name in enumerate(nodes):
