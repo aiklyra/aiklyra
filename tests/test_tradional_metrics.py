@@ -1,5 +1,6 @@
 import unittest
-from tradional_metrics import RougeScore, BlueScore
+from aiklyra import RougeScore 
+from aiklyra import BlueScore
 
 class TestRougeScore(unittest.TestCase):
     def setUp(self):
