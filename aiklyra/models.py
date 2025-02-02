@@ -56,7 +56,7 @@ class ConversationFlowAnalysisResponse(BaseModel):
     
     
 class JobSubmissionResponse(BaseModel):
-    job_id: Literal["PENDING", "STARTED", "SUCCESS", "FAILURE", "RETRY", "REVOKED"]
+    job_id: str
 
 class JobStatusResponse(BaseModel):
     job_id: str 
