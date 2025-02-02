@@ -1,7 +1,7 @@
 import networkx as nx
 from typing import Callable, Dict, List, Optional
 from aiklyra.graph.filters.base_filter import BaseGraphFilter
-from aiklyra.models import ConversationFlowAnalysisResponse 
+from aiklyra.models import JobStatusResponse , ConversationFlowAnalysisResponse
 from .graph_visualizers import (
     BaseGraphVisualizer , 
     InteractiveGraphVisualizer , 
@@ -18,14 +18,14 @@ class GraphProcessor:
         'sankey_visualizer': SankeyGraphVisualizer
     }
     
-    def __init__(self, analysis: ConversationFlowAnalysisResponse):
+    def __init__(self, job_status : JobStatusResponse):
         """
         Initialize the GraphProcessor with the analysis response.
 
         Args:
-            analysis (ConversationFlowAnalysisResponse): The response object containing transition matrix 
-                                                        and intent-to-cluster mapping.
+            job_status (JobStatusResponse): The job status response from the Aiklyra API.
         """
+        analysis = job_status.result
         self.transition_matrix = analysis.transition_matrix
         self.intent_by_cluster = analysis.intent_by_cluster
         self.graph = self._construct_graph()

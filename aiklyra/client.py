@@ -8,6 +8,7 @@ from .models import (
 ) 
 from .exceptions import (
     AiklyraAPIError,
+    InsufficientCreditsError,
     AnalysisError,
     ValidationError,
 )
@@ -109,6 +110,7 @@ class AiklyraClient:
 
         if response.status_code == 200:
             try:
+                
                 return JobSubmissionResponse(**response.json())
             except Exception as e:
                 raise AnalysisError(f"Failed to parse job submission response: {e}")

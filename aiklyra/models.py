@@ -62,5 +62,5 @@ class JobStatusResponse(BaseModel):
     job_id: str 
     status: str = "pending"
     estimated_wait_time: Optional[int] = None
-    result: Optional[Any] = None
+    result: ConversationFlowAnalysisResponse = None
     error: Optional[str] = None

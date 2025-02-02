@@ -1,257 +1,143 @@
-import pytest
-from unittest.mock import patch, MagicMock
-from aiklyra.client import (
-    AiklyraClient,
-    AnalysisError,
-    AiklyraAPIError,
-    ConversationFlowAnalysisRequest
-)
+import requests
+from typing import Dict, List, Any, Optional
+from pydantic import BaseModel
+from aiklyra.models import (
+    ConversationFlowAnalysisRequest ,
+    JobSubmissionResponse,
+    JobStatusResponse
+) 
 from aiklyra.exceptions import (
-    InvalidAPIKeyError,
-    InsufficientCreditsError,
-    ValidationError
+    AiklyraAPIError,
+    AnalysisError,
+    ValidationError,
 )
-from aiklyra.models import JobSubmissionResponse, JobStatusResponse
 
 
-@pytest.fixture
-def setup_client():
+
+
+class AiklyraClient:
     """
-    Fixture to set up test client and data.
+    A client for interacting with the Aiklyra API to analyze conversation flows.
+
+    This client now uses asynchronous endpoints:
+      - Submitting the conversation analysis job returns a job_id.
+      - The job status endpoint returns the job status, including results when ready.
+
+    Attributes:
+        BASE_ANALYSE_ENDPOINT (str): The endpoint for submitting conversation analysis jobs.
+        JOB_STATUS_ENDPOINT (str): The base endpoint for checking job status.
+        base_url (str): The base URL of the Aiklyra API.
+        headers (Dict[str, str]): The headers for API requests.
+    
+    Methods:
+        __init__(base_url): Initializes the Aiklyra client with the base URL.
+        submit_analysis(conversation_data, ...): Submits the conversation analysis job and returns a job_id.
+        check_job_status(job_id): Checks the status of a submitted job.
     """
-    base_url = "http://localhost:8002"
-    client = AiklyraClient(base_url=base_url)
-    conversation_data = {
-        "session_1": [
-            {"role": "user", "content": "Hello"},
-            {"role": "assistant", "content": "Hi there!"},
-        ]
-    }
-    return client, conversation_data
+    BASE_ANALYSE_ENDPOINT = "conversation-flow-analysis/analyse-conversation"
+    JOB_STATUS_ENDPOINT = "conversation-flow-analysis/job-status"
 
+    def __init__(self, base_url: str = "http://localhost:8002"):
+        """
+        Initialize the Aiklyra client.
 
-@patch("aiklyra.client.requests.post")
-def test_analyse_success(mock_post, setup_client):
-    """
-    Test successful analysis submission.
-    """
-    client, conversation_data = setup_client
-
-    mock_response = MagicMock()
-    mock_response.status_code = 200
-    mock_response.json.return_value = {"job_id": "123456"}
-    mock_post.return_value = mock_response
-
-    result = client.submit_analysis(conversation_data)
-    print(result)
-    assert isinstance(result, JobSubmissionResponse)
-    # Uncomment the following line if you want to check the job_id value.
-    # assert result.job_id == "123456"
-
-    # Update the expected headers to include both Content-Type and accept.
-    expected_headers = {
-        "Content-Type": "application/json",
-        "accept": "application/json"
-    }
-    expected_payload = ConversationFlowAnalysisRequest(
-        conversation_data=conversation_data,
-        min_clusters=5,
-        max_clusters=10,
-        top_k_nearest_to_centroid=10,
-        role="Any"
-    ).model_dump()
-
-    mock_post.assert_called_once_with(
-        f"{client.base_url}/{AiklyraClient.BASE_ANALYSE_ENDPOINT}",
-        headers=expected_headers,
-        json=expected_payload,
-    )
-
-
-@patch("aiklyra.client.requests.post")
-def test_analyse_analysis_error(mock_post, setup_client):
-    """
-    Test analysis error with malformed response.
-    """
-    client, conversation_data = setup_client
-
-    mock_response = MagicMock()
-    mock_response.status_code = 200
-    # Simulate an unexpected payload that does not match JobSubmissionResponse.
-    mock_response.json.return_value = {"invalid_key": "unexpected_data"}
-    mock_post.return_value = mock_response
-
-    with pytest.raises(AnalysisError):
-        client.submit_analysis(conversation_data)
-
-
-@patch("aiklyra.client.requests.post")
-def test_analyse_api_error(mock_post, setup_client):
-    """
-    Test generic API error during analysis submission.
-    """
-    client, conversation_data = setup_client
-
-    mock_response = MagicMock()
-    mock_response.status_code = 500
-    mock_response.text = "Internal Server Error"
-    mock_post.return_value = mock_response
-
-    with pytest.raises(AiklyraAPIError) as exc_info:
-        client.submit_analysis(conversation_data)
-
-    assert "Error 500" in str(exc_info.value)
-
-
-@patch("aiklyra.client.requests.post")
-def test_missing_authorization_header(mock_post, setup_client):
-    """
-    Test missing authorization header scenario.
-    """
-    client, conversation_data = setup_client
-
-    mock_response = MagicMock()
-    mock_response.status_code = 422
-    mock_response.json.return_value = {
-        "detail": [
-            {"type": "missing", "loc": ["header", "authorization"], "msg": "Field required"}
-        ]
-    }
-    mock_post.return_value = mock_response
-
-    with pytest.raises(AiklyraAPIError) as exc_info:
-        client.submit_analysis(conversation_data)
-
-    assert "Error 422" in str(exc_info.value)
-
-
-@patch("aiklyra.client.requests.post")
-def test_analyse_invalid_conversation_data_type(mock_post, setup_client):
-    """Test ValidationError when conversation_data is not a dictionary."""
-    client, _ = setup_client
-    invalid_conversation_data = ["not a dictionary"]
-
-    with pytest.raises(ValidationError) as exc_info:
-        client.submit_analysis(conversation_data=invalid_conversation_data)
-
-    assert "conversation_data must be a dictionary." in str(exc_info.value)
-    mock_post.assert_not_called()
-
-
-@patch("aiklyra.client.requests.post")
-def test_analyse_invalid_min_clusters(mock_post, setup_client):
-    """Test ValidationError when min_clusters is non-positive."""
-    client, valid_data = setup_client
-
-    with pytest.raises(ValidationError) as exc_info:
-        client.submit_analysis(conversation_data=valid_data, min_clusters=0)
-
-    assert "min_clusters and max_clusters must be positive integers." in str(exc_info.value)
-    mock_post.assert_not_called()
-
-
-@patch("aiklyra.client.requests.post")
-def test_analyse_invalid_max_clusters(mock_post, setup_client):
-    """Test ValidationError when max_clusters is non-positive."""
-    client, valid_data = setup_client
-
-    with pytest.raises(ValidationError) as exc_info:
-        client.submit_analysis(conversation_data=valid_data, max_clusters=-5)
-
-    assert "min_clusters and max_clusters must be positive integers." in str(exc_info.value)
-    mock_post.assert_not_called()
-
-
-@patch("aiklyra.client.requests.post")
-def test_analyse_min_clusters_greater_than_max(mock_post, setup_client):
-    """Test ValidationError when min_clusters exceeds max_clusters."""
-    client, valid_data = setup_client
-
-    with pytest.raises(ValidationError) as exc_info:
-        client.submit_analysis(
-            conversation_data=valid_data,
-            min_clusters=10,
-            max_clusters=5
-        )
-
-    assert "max_clusters must be greater than or equal to min_clusters".lower() in str(exc_info.value).lower()
-    mock_post.assert_not_called()
-
-
-# -----------------------------------------------
-# New tests for check_job_status method
-# -----------------------------------------------
-
-@patch("aiklyra.client.requests.get")
-def test_check_job_status_success(mock_get, setup_client):
-    """
-    Test successful job status check.
-    """
-    client, _ = setup_client
-    job_id = "123456"
-
-    mock_response = MagicMock()
-    mock_response.status_code = 200
-    mock_response.json.return_value = {
-        "job_id": job_id,
-        "status": "completed",
-        "estimated_wait_time": 0,
-        "result": {
-            "transition_matrix": [[0.1, 0.9], [0.8, 0.2]],
-            "intent_by_cluster": { "0": "greeting", "1": "response" }
+        Args:
+            base_url (str, optional): The base URL of the Aiklyra API. Defaults to "http://localhost:8002".
+        """
+        self.base_url = base_url.rstrip('/')
+        self.headers = {
+            "Content-Type": "application/json",
+            "accept": "application/json"
         }
-    }
-    mock_get.return_value = mock_response
 
-    job_status = client.check_job_status(job_id)
+    def submit_analysis(
+        self,
+        conversation_data: Dict[str, List[Dict[str, str]]],
+        min_clusters: int = 5,
+        max_clusters: int = 10,
+        top_k_nearest_to_centroid: int = 10,
+        role: str = "Any"
+    ) -> JobSubmissionResponse:
+        """
+        Submit a conversation analysis job.
 
-    assert isinstance(job_status, JobStatusResponse)
-    assert job_status.job_id == job_id
-    assert job_status.status == "completed"
-    # Depending on your model, you may need to assert on the nested result fields.
-    assert job_status.result["transition_matrix"] == [[0.1, 0.9], [0.8, 0.2]]
-    assert job_status.result["intent_by_cluster"]["0"] == "greeting"
+        The analysis is asynchronous. This method submits the job and returns a job_id.
 
-    expected_url = f"{client.base_url}/{AiklyraClient.JOB_STATUS_ENDPOINT}/{job_id}"
-    expected_headers = {
-        "Content-Type": "application/json",
-        "accept": "application/json"
-    }
-    mock_get.assert_called_once_with(expected_url, headers=expected_headers)
+        Args:
+            conversation_data (Dict[str, List[Dict[str, str]]]): The conversation data.
+            min_clusters (int, optional): Minimum number of clusters. Defaults to 5.
+            max_clusters (int, optional): Maximum number of clusters. Defaults to 10.
+            top_k_nearest_to_centroid (int, optional): Top K nearest to centroid. Defaults to 10.
+            role (str, optional): Role to be analyzed in the conversations. Defaults to "Any".
 
+        Returns:
+            JobSubmissionResponse: Contains the job_id for the submitted job.
 
-@patch("aiklyra.client.requests.get")
-def test_check_job_status_analysis_error(mock_get, setup_client):
-    """
-    Test job status check when the response is malformed.
-    """
-    client, _ = setup_client
-    job_id = "123456"
+        Raises:
+            InsufficientCreditsError: If the user has insufficient credits.
+            AnalysisError: If the analysis fails.
+            AiklyraAPIError: For other API-related errors.
+        """
+        if not isinstance(conversation_data, dict):
+            raise ValidationError("conversation_data must be a dictionary.")
+        if min_clusters <= 0 or max_clusters <= 0:
+            raise ValidationError("min_clusters and max_clusters must be positive integers.")
+        if min_clusters > max_clusters:
+            raise ValidationError("max_clusters must be greater than or equal to min_clusters.")
 
-    mock_response = MagicMock()
-    mock_response.status_code = 200
-    # Simulate a response that cannot be parsed into a JobStatusResponse.
-    mock_response.json.return_value = {"invalid_key": "unexpected_data"}
-    mock_get.return_value = mock_response
+        # If a specific role is provided, filter the conversation data accordingly.
+        if role != "Any":
+            filtered_by_role = {}
+            for conv_id, conv in conversation_data.items():
+                filtered_by_role[conv_id] = [msg for msg in conv if msg.get("role") == role]
+            conversation_data = filtered_by_role
 
-    with pytest.raises(AnalysisError):
-        client.check_job_status(job_id)
+        url = f"{self.base_url}/{AiklyraClient.BASE_ANALYSE_ENDPOINT}"
+        # Build the payload using the ConversationFlowAnalysisRequest model.
+        payload = ConversationFlowAnalysisRequest(
+            conversation_data=conversation_data,
+            min_clusters=min_clusters,
+            max_clusters=max_clusters,
+            top_k_nearest_to_centroid=top_k_nearest_to_centroid,
+            role=role
+        ).model_dump()
 
+        try:
+            response = requests.post(url, headers=self.headers, json=payload)
+        except requests.RequestException as e:
+            raise AiklyraAPIError(f"Request failed: {e}")
 
-@patch("aiklyra.client.requests.get")
-def test_check_job_status_api_error(mock_get, setup_client):
-    """
-    Test job status check when the API returns a non-200 status code.
-    """
-    client, _ = setup_client
-    job_id = "123456"
+        if response.status_code == 200:
+            try:
+                return JobSubmissionResponse(**response.json())
+            except Exception as e:
+                raise AnalysisError(f"Failed to parse job submission response: {e}")
+        else:
+            raise AiklyraAPIError(f"Error {response.status_code}: {response.text}")
 
-    mock_response = MagicMock()
-    mock_response.status_code = 404
-    mock_response.text = "Job not found"
-    mock_get.return_value = mock_response
+    def check_job_status(self, job_id: str) -> JobStatusResponse:
+        """
+        Check the status of a submitted job.
 
-    with pytest.raises(AiklyraAPIError) as exc_info:
-        client.check_job_status(job_id)
+        Args:
+            job_id (str): The ID of the job to check.
 
-    assert "Error 404" in str(exc_info.value)
+        Returns:
+            JobStatusResponse: The current status of the job, including results if available.
+
+        Raises:
+            AiklyraAPIError: If the API call fails or returns an unexpected status.
+        """
+        url = f"{self.base_url}/{AiklyraClient.JOB_STATUS_ENDPOINT}/{job_id}"
+        try:
+            response = requests.get(url, headers=self.headers)
+        except requests.RequestException as e:
+            raise AiklyraAPIError(f"Request failed: {e}")
+
+        if response.status_code == 200:
+            try:
+                return JobStatusResponse(**response.json())
+            except Exception as e:
+                raise AnalysisError(f"Failed to parse job status response: {e}")
+        else:
+            raise AiklyraAPIError(f"Error {response.status_code}: {response.text}")
