@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='Aiklyra',
-    version='0.1.6',
+    version='1.0.0',
     author='Aiklyra',
     author_email='achref.benammar@ieee.org',
     description='A Python client library for Aiklyra API',
@@ -17,7 +17,7 @@ setup(
         'networkx==3.4.2',
         'numpy<2.0',
         'matplotlib<=3.10.0',
-        'pyvis<=0.3.2'
+        'pyvis==0.3.2'
     ],
     license='Apache License 2.0',
     classifiers=[
