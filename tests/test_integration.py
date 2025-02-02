@@ -1,121 +1,195 @@
 import pytest
-import json
 from unittest.mock import patch, MagicMock
-import numpy as np
-from difflib import SequenceMatcher
-from aiklyra import AiklyraClient, GraphProcessor, FilterFR
-
+from aiklyra.client import (
+    AiklyraClient,
+    InsufficientCreditsError,
+    AnalysisError,
+    AiklyraAPIError,
+    ConversationFlowAnalysisRequest,
+    ValidationError,
+    JobSubmissionResponse,
+    JobStatusResponse,
+)
 
 @pytest.fixture
-def mock_conversation_data():
+def setup_client():
     """
-    Fixture to provide mock conversation data for testing.
+    Fixture to set up test client and data.
     """
-    return {
+    base_url = "http://localhost:8002"
+    client = AiklyraClient(base_url=base_url)
+    conversation_data = {
         "session_1": [
             {"role": "user", "content": "Hello"},
             {"role": "assistant", "content": "Hi there!"},
-        ],
-        "session_2": [
-            {"role": "user", "content": "How are you?"},
-            {"role": "assistant", "content": "I'm doing great!"},
-        ],
+        ]
     }
-
-
-@pytest.fixture
-def mock_analysis_response():
-    """
-    Fixture to provide a mock analysis response with stochastic results.
-    """
-    return {
-        "transition_matrix": [
-            [0.5, 0.5],
-            [0.0, 0.0]
-        ],
-        "intent_by_cluster": {
-            "0": "Greeting and establishing rapport",
-            "1": "Response to Greeting"
-        }
-    }
-
-
-def assert_intent_similarity(expected_intents, actual_intents, threshold=0.8):
-    """
-    Assert that the intents in the response are similar to a certain degree.
-
-    Args:
-        expected_intents (dict): Expected intents.
-        actual_intents (dict): Actual intents.
-        threshold (float): Similarity threshold (0 to 1).
-
-    Raises:
-        AssertionError: If any intent similarity is below the threshold.
-    """
-    for key, expected_intent in expected_intents.items():
-        actual_intent = actual_intents.get(key, "")
-        similarity = SequenceMatcher(None, expected_intent, actual_intent).ratio()
-        assert similarity >= threshold, (
-            f"Intent '{expected_intent}' and '{actual_intent}' are not similar enough. "
-            f"Similarity: {similarity:.2f}"
-        )
+    return client, conversation_data
 
 
 @patch("aiklyra.client.requests.post")
-def test_overall_library_with_tolerance(mock_post, mock_conversation_data, mock_analysis_response):
+def test_submit_analysis_success(mock_post, setup_client):
     """
-    Integration test for the overall library functionality with stochasticity handling.
+    Test successful job submission.
     """
-    # Mock AiklyraClient API response
+    client, conversation_data = setup_client
+
+    # The API now returns a job_id.
     mock_response = MagicMock()
     mock_response.status_code = 200
-    mock_response.json.return_value = mock_analysis_response
+    mock_response.json.return_value = {"job_id": "12345"}
     mock_post.return_value = mock_response
 
-    # Initialize the AiklyraClient
-    client = AiklyraClient(
-        api_key="mock_api_key",
-        base_url="http://localhost:8002/"
-    )
+    result = client.submit_analysis(conversation_data)
 
-    # Perform the analysis
-    analysis = client.analyse(
-        conversation_data=mock_conversation_data,
-        min_clusters=20,
-        max_clusters=25,
-        top_k_nearest_to_centroid=10
-    )
+    assert isinstance(result, JobSubmissionResponse)
+    assert result.job_id == "12345"
 
-    # Expected values
-    expected_transition_matrix = np.array([
-        [0.5, 0.5],
-        [0.0, 0.0]
-    ])
-    expected_intent_by_cluster = {
-        "0": "Greeting and small talk",
-        "1": "Overall Intent: Greeting/Positive Response"
-    }
+    expected_url = f"{client.base_url}/{AiklyraClient.BASE_ANALYSE_ENDPOINT}"
+    expected_payload = ConversationFlowAnalysisRequest(
+        conversation_data=conversation_data,
+        min_clusters=5,
+        max_clusters=10,
+        top_k_nearest_to_centroid=10,
+        role="Any"
+    ).model_dump()
 
-    # Assert transition matrices are equal within a tolerance
-    np.testing.assert_allclose(
-        np.array(analysis.transition_matrix),
-        expected_transition_matrix,
-        rtol=1e-2,  # Relative tolerance
-        atol=1e-3   # Absolute tolerance
+    mock_post.assert_called_once_with(
+        expected_url,
+        headers={
+            "Content-Type": "application/json",
+            "accept": "application/json",
+        },
+        json=expected_payload,
     )
 
 
-    # Process the graph
-    graph_processor = GraphProcessor(analysis)
+@patch("aiklyra.client.requests.post")
+def test_submit_analysis_invalid_api_key(mock_post, setup_client):
+    """
+    Test API error for an invalid API key scenario.
+    Since the API key is no longer used, this error is returned as a generic API error.
+    """
+    client, conversation_data = setup_client
 
-    # Apply filters to the graph
-    filter_and_reconnect = FilterFR(min_weight=0.1, top_k=1)
-    graph_processor.filter_graph(filter_strategy=filter_and_reconnect)
+    mock_response = MagicMock()
+    mock_response.status_code = 403
+    mock_response.json.return_value = {"detail": "Invalid API Key"}
+    mock_post.return_value = mock_response
 
-    # Verify that the graph is processed without errors
-    assert graph_processor.graph is not None
-    assert len(graph_processor.graph.edges) > 0
+    with pytest.raises(AiklyraAPIError) as exc_info:
+        client.submit_analysis(conversation_data)
 
-    # Optionally, verify additional properties of the graph
-    edges = list(graph_processor.graph.edges(data=True))
-    assert all("weight" in data for _, _, data in edges), "Filtered graph edges must contain weights."
+    assert "Invalid API Key" in str(exc_info.value)
+
+
+@patch("aiklyra.client.requests.post")
+def test_submit_analysis_insufficient_credits(mock_post, setup_client):
+    """
+    Test insufficient credits error.
+    """
+    client, conversation_data = setup_client
+
+    mock_response = MagicMock()
+    mock_response.status_code = 403
+    mock_response.json.return_value = {"detail": "Insufficient credits"}
+    mock_post.return_value = mock_response
+
+    with pytest.raises(InsufficientCreditsError):
+        client.submit_analysis(conversation_data)
+
+
+@patch("aiklyra.client.requests.post")
+def test_submit_analysis_analysis_error(mock_post, setup_client):
+    """
+    Test analysis error with a malformed response.
+    """
+    client, conversation_data = setup_client
+
+    mock_response = MagicMock()
+    mock_response.status_code = 200
+    # This JSON does not have the expected job_id key.
+    mock_response.json.return_value = {"invalid_key": "unexpected_data"}
+    mock_post.return_value = mock_response
+
+    with pytest.raises(AnalysisError):
+        client.submit_analysis(conversation_data)
+
+
+@patch("aiklyra.client.requests.post")
+def test_submit_analysis_api_error(mock_post, setup_client):
+    """
+    Test generic API error.
+    """
+    client, conversation_data = setup_client
+
+    mock_response = MagicMock()
+    mock_response.status_code = 500
+    mock_response.text = "Internal Server Error"
+    mock_post.return_value = mock_response
+
+    with pytest.raises(AiklyraAPIError) as exc_info:
+        client.submit_analysis(conversation_data)
+
+    assert "Error 500" in str(exc_info.value)
+
+
+@patch("aiklyra.client.requests.post")
+def test_submit_analysis_invalid_conversation_data_type(mock_post, setup_client):
+    """
+    Test ValidationError when conversation_data is not a dictionary.
+    """
+    client, _ = setup_client
+    invalid_conversation_data = ["not a dictionary"]
+
+    with pytest.raises(ValidationError) as exc_info:
+        client.submit_analysis(conversation_data=invalid_conversation_data)
+
+    assert "conversation_data must be a dictionary." in str(exc_info.value)
+    mock_post.assert_not_called()
+
+
+@patch("aiklyra.client.requests.post")
+def test_submit_analysis_invalid_min_clusters(mock_post, setup_client):
+    """
+    Test ValidationError when min_clusters is non-positive.
+    """
+    client, valid_data = setup_client
+
+    with pytest.raises(ValidationError) as exc_info:
+        client.submit_analysis(conversation_data=valid_data, min_clusters=0)
+
+    assert "min_clusters and max_clusters must be positive integers." in str(exc_info.value)
+    mock_post.assert_not_called()
+
+
+@patch("aiklyra.client.requests.post")
+def test_submit_analysis_invalid_max_clusters(mock_post, setup_client):
+    """
+    Test ValidationError when max_clusters is non-positive.
+    """
+    client, valid_data = setup_client
+
+    with pytest.raises(ValidationError) as exc_info:
+        client.submit_analysis(conversation_data=valid_data, max_clusters=-5)
+
+    assert "min_clusters and max_clusters must be positive integers." in str(exc_info.value)
+    mock_post.assert_not_called()
+
+
+@patch("aiklyra.client.requests.post")
+def test_submit_analysis_min_clusters_greater_than_max(mock_post, setup_client):
+    """
+    Test ValidationError when min_clusters exceeds max_clusters.
+    """
+    client, valid_data = setup_client
+
+    with pytest.raises(ValidationError) as exc_info:
+        client.submit_analysis(
+            conversation_data=valid_data,
+            min_clusters=10,
+            max_clusters=5
+        )
+
+    assert "max_clusters must be greater than or equal to min_clusters." in str(exc_info.value)
+    mock_post.assert_not_called()
