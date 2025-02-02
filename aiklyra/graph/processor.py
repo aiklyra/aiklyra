@@ -93,7 +93,7 @@ class GraphProcessor:
         Get the specified graph visualizer.
 
         Args:
-            visualizer (str): The visualizer to get. Options: 'static_visualizer', 'interactive_visualizer'.
+            visualizer (str): The visualizer to get. Options: 'static_visualizer', 'interactive_visualizer', 'sankey_visualizer'.
 
         Returns:
             BaseGraphVisualizer: The visualizer instance.

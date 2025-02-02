@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-from typing import List, Dict, Optional, Any
+from typing import List, Dict, Optional, Any, Literal
 
 class Utterance(BaseModel):
     """
@@ -56,11 +56,11 @@ class ConversationFlowAnalysisResponse(BaseModel):
     
     
 class JobSubmissionResponse(BaseModel):
-    job_id: str
+    job_id: Literal["PENDING", "STARTED", "SUCCESS", "FAILURE", "RETRY", "REVOKED"]
 
 class JobStatusResponse(BaseModel):
     job_id: str 
-    status: str = "pending"
+    status: Literal["PENDING", "STARTED", "SUCCESS", "FAILURE", "RETRY", "REVOKED"] = Field(default="PENDING")
     estimated_wait_time: Optional[int] = None
-    result: ConversationFlowAnalysisResponse = None
+    result: Optional[ConversationFlowAnalysisResponse] =  Field(default=None)
     error: Optional[str] = None

@@ -144,7 +144,16 @@ class AiklyraClient:
 
         if response.status_code == 200:
             try:
-                return JobStatusResponse(**response.json())
+                if response.json()['status'] != 'SUCCESS':
+                    response_body = {
+                        "job_id": job_id,
+                        "status": response.json()['status'],
+                        'estimated_wait_time': response.json().get('estimated_wait_time', None),
+                        'error': response.json().get('error', None)
+                    }
+                else:
+                    response_body = response.json()
+                return JobStatusResponse(**response_body)
             except Exception as e:
                 raise AnalysisError(f"Failed to parse job status response: {e}")
         else:
