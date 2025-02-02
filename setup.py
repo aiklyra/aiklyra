@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='Aiklyra',
-    version='1.0.1',
+    version='1.0.2',
     author='Aiklyra',
     author_email='achref.benammar@ieee.org',
     description='A Python client library for Aiklyra API',
