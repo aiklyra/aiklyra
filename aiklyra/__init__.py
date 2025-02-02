@@ -9,7 +9,9 @@ from .exceptions import (
 )
 from .models import (
     ConversationFlowAnalysisRequest,
-    ConversationFlowAnalysisResponse
+    ConversationFlowAnalysisResponse,
+    JobSubmissionResponse,
+    JobStatusResponse
 )
 from .graph import *
 from .graph.filters import *

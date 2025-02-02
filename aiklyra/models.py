@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, Any
 
 class Utterance(BaseModel):
     """
@@ -53,3 +53,14 @@ class ConversationFlowAnalysisResponse(BaseModel):
     """
     transition_matrix: List[List[float]]
     intent_by_cluster: Dict[int, str]
+    
+    
+class JobSubmissionResponse(BaseModel):
+    job_id: str
+
+class JobStatusResponse(BaseModel):
+    job_id: str
+    status: str
+    estimated_wait_time: Optional[int] = None
+    result: Optional[Any] = None
+    error: Optional[str] = None
