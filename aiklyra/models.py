@@ -59,8 +59,8 @@ class JobSubmissionResponse(BaseModel):
     job_id: str
 
 class JobStatusResponse(BaseModel):
-    job_id: str
-    status: str
+    job_id: str 
+    status: str = "pending"
     estimated_wait_time: Optional[int] = None
     result: Optional[Any] = None
     error: Optional[str] = None

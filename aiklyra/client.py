@@ -8,7 +8,6 @@ from .models import (
 ) 
 from .exceptions import (
     AiklyraAPIError,
-    InsufficientCreditsError,
     AnalysisError,
     ValidationError,
 )
