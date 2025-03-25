@@ -38,18 +38,22 @@ class AiklyraClient:
     BASE_ANALYSE_ENDPOINT = "conversation-flow-analysis/analyse-conversation"
     JOB_STATUS_ENDPOINT = "conversation-flow-analysis/job-status"
 
-    def __init__(self, base_url: str = "http://localhost:8002"):
+    def __init__(self, base_url: str = "http://localhost:8002" , api_key : str = None):
         """
         Initialize the Aiklyra client.
 
         Args:
             base_url (str, optional): The base URL of the Aiklyra API. Defaults to "http://localhost:8002".
+        api_key (str, optional): The API key to use for authentication for dataset size > 100. Defaults to None.
         """
+        self.api_key = api_key 
         self.base_url = base_url.rstrip('/')
         self.headers = {
             "Content-Type": "application/json",
-            "accept": "application/json"
+            "accept": "application/json",
         }
+        if self.api_key :
+            self.headers["Authorization"] = f"Bearer {self.api_key}"
 
     def submit_analysis(
         self,
